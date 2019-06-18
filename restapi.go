@@ -66,7 +66,11 @@ func (s *Session) request(method, urlStr, contentType string, b []byte, bucketID
 	if bucketID == "" {
 		bucketID = strings.SplitN(urlStr, "?", 2)[0]
 	}
-	return s.RequestWithLockedBucket(method, urlStr, contentType, b, s.Ratelimiter.LockBucket(bucketID), sequence)
+	if s == nil {
+		log.Printf("Session is nil!")
+	}
+	bucket := s.Ratelimiter.LockBucket(bucketID)
+	return s.RequestWithLockedBucket(method, urlStr, contentType, b, bucket, sequence)
 }
 
 // RequestWithLockedBucket makes a request using a bucket that's already been locked
@@ -180,91 +184,6 @@ func unmarshal(data []byte, v interface{}) error {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Functions specific to Discord Sessions
-// ------------------------------------------------------------------------------------------------
-
-// Login asks the Discord server for an authentication token.
-//
-// NOTE: While email/pass authentication is supported by DiscordGo it is
-// HIGHLY DISCOURAGED by Discord. Please only use email/pass to obtain a token
-// and then use that authentication token for all future connections.
-// Also, doing any form of automation with a user (non Bot) account may result
-// in that account being permanently banned from Discord.
-func (s *Session) Login(email, password string) (err error) {
-
-	data := struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}{email, password}
-
-	response, err := s.RequestWithBucketID("POST", EndpointLogin, data, EndpointLogin)
-	if err != nil {
-		return
-	}
-
-	temp := struct {
-		Token string `json:"token"`
-		MFA   bool   `json:"mfa"`
-	}{}
-
-	err = unmarshal(response, &temp)
-	if err != nil {
-		return
-	}
-
-	s.Token = temp.Token
-	s.MFA = temp.MFA
-	return
-}
-
-// Register sends a Register request to Discord, and returns the authentication token
-// Note that this account is temporary and should be verified for future use.
-// Another option is to save the authentication token external, but this isn't recommended.
-func (s *Session) Register(username string) (token string, err error) {
-
-	data := struct {
-		Username string `json:"username"`
-	}{username}
-
-	response, err := s.RequestWithBucketID("POST", EndpointRegister, data, EndpointRegister)
-	if err != nil {
-		return
-	}
-
-	temp := struct {
-		Token string `json:"token"`
-	}{}
-
-	err = unmarshal(response, &temp)
-	if err != nil {
-		return
-	}
-
-	token = temp.Token
-	return
-}
-
-// Logout sends a logout request to Discord.
-// This does not seem to actually invalidate the token.  So you can still
-// make API calls even after a Logout.  So, it seems almost pointless to
-// even use.
-func (s *Session) Logout() (err error) {
-
-	//  _, err = s.Request("POST", LOGOUT, `{"token": "` + s.Token + `"}`)
-
-	if s.Token == "" {
-		return
-	}
-
-	data := struct {
-		Token string `json:"token"`
-	}{s.Token}
-
-	_, err = s.RequestWithBucketID("POST", EndpointLogout, data, EndpointLogout)
-	return
-}
-
-// ------------------------------------------------------------------------------------------------
 // Functions specific to Discord Users
 // ------------------------------------------------------------------------------------------------
 
@@ -295,6 +214,28 @@ func (s *Session) UserAvatarDecode(u *User) (img image.Image, err error) {
 	}
 
 	img, _, err = image.Decode(bytes.NewReader(body))
+	return
+}
+
+// UserUpdate updates a users settings.
+func (s *Session) UserUpdate(username, avatar string) (st *User, err error) {
+
+	// NOTE: Avatar must be either the hash/id of existing Avatar or
+	// data:image/png;base64,BASE64_STRING_OF_NEW_AVATAR_PNG
+	// to set a new avatar.
+	// If left blank, avatar will be set to null/blank
+
+	data := struct {
+		Username string `json:"username,omitempty"`
+		Avatar   string `json:"avatar,omitempty"`
+	}{username, avatar}
+
+	body, err := s.RequestWithBucketID("PATCH", EndpointUser("@me"), data, EndpointUsers)
+	if err != nil {
+		return
+	}
+
+	err = unmarshal(body, &st)
 	return
 }
 
@@ -623,7 +564,13 @@ func (s *Session) GuildBans(guildID string) (st []*GuildBan, err error) {
 	}
 
 	err = unmarshal(body, &st)
+	if err != nil {
+		return
+	}
 
+	for _, b := range st {
+		b.User.Session = s
+	}
 	return
 }
 
@@ -962,6 +909,7 @@ func (s *Session) GuildRoles(guildID string) (st []*Role, err error) {
 
 	for _, r := range st {
 		r.Session = s
+		r.GuildID = guildID
 	}
 	return // TODO return pointer
 }
@@ -981,6 +929,7 @@ func (s *Session) GuildRoleCreate(guildID string) (st *Role, err error) {
 	}
 
 	st.Session = s
+	st.GuildID = guildID
 	return
 }
 
@@ -993,20 +942,21 @@ func (s *Session) GuildRoleCreate(guildID string) (st *Role, err error) {
 // perm      : The permissions for the role.
 // mention   : Whether this role is mentionable
 func (s *Session) GuildRoleEdit(guildID, roleID, name string, color int, hoist bool, perm int, mention bool) (st *Role, err error) {
+	data := &RoleEdit{name, color, hoist, perm, mention}
 
+	return s.GuildRoleEditComplex(guildID, roleID, data)
+}
+
+// GuildRoleEditComplex updates an existing Guild Role with new values
+// guildID   : The ID of a Guild.
+// roleID    : The ID of a Role.
+// data      : data to send to the API
+func (s *Session) GuildRoleEditComplex(guildID, roleID string, data *RoleEdit) (st *Role, err error) {
 	// Prevent sending a color int that is too big.
-	if color > 0xFFFFFF {
+	if data.Color > 0xFFFFFF {
 		err = fmt.Errorf("color value cannot be larger than 0xFFFFFF")
 		return nil, err
 	}
-
-	data := struct {
-		Name        string `json:"name"`        // The role's name (overwrites existing)
-		Color       int    `json:"color"`       // The color the role should have (as a decimal, not hex)
-		Hoist       bool   `json:"hoist"`       // Whether to display the role's users separately
-		Permissions int    `json:"permissions"` // The overall permissions number of the role (overwrites existing)
-		Mentionable bool   `json:"mentionable"` // Whether this role is mentionable
-	}{name, color, hoist, perm, mention}
 
 	body, err := s.RequestWithBucketID("PATCH", EndpointGuildRole(guildID, roleID), data, EndpointGuildRole(guildID, ""))
 	if err != nil {
@@ -1019,6 +969,7 @@ func (s *Session) GuildRoleEdit(guildID, roleID, name string, color int, hoist b
 	}
 
 	st.Session = s
+	st.GuildID = guildID
 	return
 }
 
@@ -1039,6 +990,7 @@ func (s *Session) GuildRoleReorder(guildID string, roles []*Role) (st []*Role, e
 
 	for _, r := range st {
 		r.Session = s
+		r.GuildID = guildID
 	}
 	return
 }
@@ -2080,7 +2032,7 @@ func (s *Session) WebhookWithToken(webhookID, token string) (st *Webhook, err er
 // webhookID: The ID of a webhook.
 // name     : The name of the webhook.
 // avatar   : The avatar of the webhook.
-func (s *Session) WebhookEdit(webhookID, name, avatar, channelID string) (st *Role, err error) {
+func (s *Session) WebhookEdit(webhookID, name, avatar, channelID string) (st *Webhook, err error) {
 
 	data := struct {
 		Name      string `json:"name,omitempty"`
@@ -2098,7 +2050,7 @@ func (s *Session) WebhookEdit(webhookID, name, avatar, channelID string) (st *Ro
 		return
 	}
 
-	st.Session = s
+	st.User.Session = s
 	return
 }
 
@@ -2107,7 +2059,7 @@ func (s *Session) WebhookEdit(webhookID, name, avatar, channelID string) (st *Ro
 // token    : The auth token for the webhook.
 // name     : The name of the webhook.
 // avatar   : The avatar of the webhook.
-func (s *Session) WebhookEditWithToken(webhookID, token, name, avatar string) (st *Role, err error) {
+func (s *Session) WebhookEditWithToken(webhookID, token, name, avatar string) (st *Webhook, err error) {
 
 	data := struct {
 		Name   string `json:"name,omitempty"`
@@ -2124,7 +2076,6 @@ func (s *Session) WebhookEditWithToken(webhookID, token, name, avatar string) (s
 		return
 	}
 
-	st.Session = s
 	return
 }
 
@@ -2140,24 +2091,9 @@ func (s *Session) WebhookDelete(webhookID string) (err error) {
 // WebhookDeleteWithToken deletes a webhook for a given ID with an auth token.
 // webhookID: The ID of a webhook.
 // token    : The auth token for the webhook.
-func (s *Session) WebhookDeleteWithToken(webhookID, token string) (st *Webhook, err error) {
+func (s *Session) WebhookDeleteWithToken(webhookID, token string) (err error) {
 
-	body, err := s.RequestWithBucketID("DELETE", EndpointWebhookToken(webhookID, token), nil, EndpointWebhookToken("", ""))
-	if err != nil {
-		return
-	}
-
-	err = unmarshal(body, &st)
-	if err != nil {
-		return
-	}
-
-	user, UErr := s.User(st.User.ID)
-	if UErr == nil {
-		st.User = user
-	} else {
-		st.User.Session = s
-	}
+	_, err = s.RequestWithBucketID("DELETE", EndpointWebhookToken(webhookID, token), nil, EndpointWebhookToken("", ""))
 
 	return
 }
