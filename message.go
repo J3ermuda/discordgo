@@ -13,6 +13,7 @@ import (
 	"io"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // MessageType is the type of Message
@@ -67,6 +68,10 @@ type Message struct {
 	// valid user (webhook-sent messages do not possess a full author).
 	Author *User `json:"author"`
 
+	// The author of the message as a Member object
+	// if the message was send in a guild
+	Member *Member `json:"member,omitempty"`
+
 	// A list of attachments present in the message.
 	Attachments []*MessageAttachment `json:"attachments"`
 
@@ -116,6 +121,16 @@ type MessageEdit struct {
 
 	ID      string
 	Channel string
+}
+
+// GetID returns the ID of the message
+func (m *Message) GetID() string {
+	return m.ID
+}
+
+// CreatedAt returns the messages creation time in UTC
+func (m *Message) CreatedAt() (creation time.Time, err error) {
+	return SnowflakeToTime(m.ID)
 }
 
 // NewMessageEdit returns a MessageEdit struct, initialized
