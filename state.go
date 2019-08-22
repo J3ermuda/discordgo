@@ -14,6 +14,7 @@ package discordgo
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"sync"
 )
@@ -41,6 +42,8 @@ type State struct {
 	TrackVoice      bool
 	TrackPresences  bool
 
+	cache StateCache
+
 	guildMap   map[string]*Guild
 	channelMap map[string]*Channel
 	memberMap  map[string]map[string]*Member
@@ -59,6 +62,7 @@ func NewState() *State {
 		TrackRoles:     true,
 		TrackVoice:     true,
 		TrackPresences: true,
+		cache:          NewLocalAdapter(),
 		guildMap:       make(map[string]*Guild),
 		channelMap:     make(map[string]*Channel),
 		memberMap:      make(map[string]map[string]*Member),
@@ -66,11 +70,10 @@ func NewState() *State {
 }
 
 func (s *State) createMemberMap(guild *Guild) {
-	members := make(map[string]*Member)
+	s.cache.DelSet(fmt.Sprintf("members:%s", guild.ID))
 	for _, m := range guild.Members {
-		members[m.User.ID] = m
+		s.cache.Put(fmt.Sprintf("members:%s", guild.ID), m.User.ID, m)
 	}
-	s.memberMap[guild.ID] = members
 }
 
 // GuildAdd adds a guild to the current world state, or
@@ -93,14 +96,12 @@ func (s *State) GuildAdd(guild *Guild, se *Session) error {
 	// If this guild contains a new member slice, we must regenerate the member map so the pointers stay valid
 	if guild.Members != nil {
 		s.createMemberMap(guild)
-	} else if _, ok := s.memberMap[guild.ID]; !ok {
-		// Even if we have no new member slice, we still initialize the member map for this guild if it doesn't exist
-		s.memberMap[guild.ID] = make(map[string]*Member)
 	}
 
-	if g, ok := s.guildMap[guild.ID]; ok {
+	if gi, ok := s.cache.Get("guilds", guild.ID); ok == nil {
 		// We are about to replace `g` in the state with `guild`, but first we need to
 		// make sure we preserve any fields that the `guild` doesn't contain from `g`.
+		g := gi.(Guild)
 		if guild.MemberCount == 0 {
 			guild.MemberCount = g.MemberCount
 		}
@@ -122,31 +123,26 @@ func (s *State) GuildAdd(guild *Guild, se *Session) error {
 		if guild.VoiceStates == nil {
 			guild.VoiceStates = g.VoiceStates
 		}
-		*g = *guild
 		return nil
 	}
 
 	s.Guilds = append(s.Guilds, guild)
-	s.guildMap[guild.ID] = guild
+	_ = s.cache.Put("guilds", guild.ID, guild)
 
 	return nil
 }
 
 // GuildRemove removes a guild from current world state.
 func (s *State) GuildRemove(guild *Guild) error {
+
 	if s == nil {
 		return ErrNilState
 	}
 
-	_, err := s.Guild(guild.ID)
-	if err != nil {
-		return err
-	}
+	_, _ = s.cache.Del("guilds", guild.ID)
 
 	s.Lock()
 	defer s.Unlock()
-
-	delete(s.guildMap, guild.ID)
 
 	for i, g := range s.Guilds {
 		if g.ID == guild.ID {
@@ -163,15 +159,14 @@ func (s *State) GuildRemove(guild *Guild) error {
 //     _, err := discordgo.Session.State.Guild(guildID)
 //     isInGuild := err == nil
 func (s *State) Guild(guildID string) (*Guild, error) {
+
 	if s == nil {
 		return nil, ErrNilState
 	}
 
-	s.RLock()
-	defer s.RUnlock()
-
-	if g, ok := s.guildMap[guildID]; ok {
-		return g, nil
+	guild, err := s.cache.Get("guilds", guildID)
+	if err == nil {
+		return guild.(*Guild), nil
 	}
 
 	return nil, ErrStateNotFound
