@@ -907,9 +907,14 @@ func (s *Session) GuildRoles(guildID string) (st []*Role, err error) {
 		return
 	}
 
+	g, err := s.State.Guild(guildID)
+	if err != nil {
+		return
+	}
+
 	for _, r := range st {
 		r.Session = s
-		r.GuildID = guildID
+		r.Guild = g
 	}
 	return // TODO return pointer
 }
@@ -928,8 +933,13 @@ func (s *Session) GuildRoleCreate(guildID string) (st *Role, err error) {
 		return
 	}
 
+	g, err := s.State.Guild(guildID)
+	if err != nil {
+		return
+	}
+
 	st.Session = s
-	st.GuildID = guildID
+	st.Guild = g
 	return
 }
 
@@ -968,8 +978,13 @@ func (s *Session) GuildRoleEditComplex(guildID, roleID string, data *RoleEdit) (
 		return
 	}
 
+	g, err := s.State.Guild(guildID)
+	if err != nil {
+		return
+	}
+
 	st.Session = s
-	st.GuildID = guildID
+	st.Guild = g
 	return
 }
 
@@ -988,9 +1003,14 @@ func (s *Session) GuildRoleReorder(guildID string, roles []*RoleMove) (st []*Rol
 		return
 	}
 
+	g, err := s.State.Guild(guildID)
+	if err != nil {
+		return
+	}
+
 	for _, r := range st {
 		r.Session = s
-		r.GuildID = guildID
+		r.Guild = g
 	}
 	return
 }
@@ -1261,6 +1281,18 @@ func (s *Session) GuildEmojiCreate(guildID, name, image string, roles []string) 
 	}
 
 	err = unmarshal(body, &emoji)
+	if err != nil {
+		return
+	}
+
+	g, err := s.State.Guild(guildID)
+	if err != nil {
+		return
+	}
+
+	emoji.Guild = g
+	emoji.Session = s
+
 	return
 }
 
@@ -1282,6 +1314,18 @@ func (s *Session) GuildEmojiEdit(guildID, emojiID, name string, roles []string) 
 	}
 
 	err = unmarshal(body, &emoji)
+	if err != nil {
+		return
+	}
+
+	g, err := s.State.Guild(guildID)
+	if err != nil {
+		return
+	}
+
+	emoji.Guild = g
+	emoji.Session = s
+
 	return
 }
 
