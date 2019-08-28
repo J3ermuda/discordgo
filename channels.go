@@ -268,7 +268,7 @@ func (c *Channel) MessagesBulkDelete(messages []*Message) (err error) {
 	return
 }
 
-// MessagesBulkDelete bulk deletes the messages from the channel for the provided messageIDs.
+// MessagesBulkDeleteByID bulk deletes the messages from the channel for the provided messageIDs.
 // If only one messageID is in the slice call channelMessageDelete function.
 // If the slice is empty do nothing.
 // messages  : The IDs of the messages to be deleted. A slice of string IDs. A maximum of 100 messages.
