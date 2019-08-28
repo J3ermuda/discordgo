@@ -128,11 +128,11 @@ func (e *MessageEmbed) SetAuthorName(name string) *MessageEmbed {
 // name :     the author name
 // url :      the author url
 // iconUrl :  the url of the author icon
-func (e *MessageEmbed) SetAuthor(name, url, iconUrl string) *MessageEmbed {
+func (e *MessageEmbed) SetAuthor(name, url, iconURL string) *MessageEmbed {
 	e.Author = &MessageEmbedAuthor{
 		Name:    name,
 		URL:     url,
-		IconURL: iconUrl,
+		IconURL: iconURL,
 	}
 	return e
 }

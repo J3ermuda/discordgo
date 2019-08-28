@@ -45,6 +45,9 @@ type User struct {
 
 	// The Session to call the API and retrieve other objects
 	Session *Session `json:"session,omitempty"`
+
+	// guilds the user is in; used for caching
+	guilds []string
 }
 
 // String returns a unique identifier of the form username#discriminator
@@ -151,7 +154,7 @@ func (u *User) SendMessageComplex(data *MessageSend) (message *Message, err erro
 	return u.DMChannel.SendMessageComplex(data)
 }
 
-// EditMessageComplex edits an existing message, replacing it entirely with
+// EditMessage edits an existing message, replacing it entirely with
 // the given MessageEdit struct
 func (u *User) EditMessage(data *MessageEdit) (edited *Message, err error) {
 	if u.DMChannel == nil {

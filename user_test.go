@@ -29,7 +29,7 @@ func TestUser_SendMessage(t *testing.T) {
 		t.Skip("Skipping, dg not set.")
 	}
 
-	user, err := dg.User(envAdmin)
+	user, err := dg.State.GetUser(envAdmin)
 	if err != nil {
 		t.Fatalf("failed to retrieve user %s", err)
 	}

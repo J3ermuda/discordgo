@@ -3,8 +3,13 @@ package discordgo
 import "errors"
 
 var (
-	NotACustomEmoji   = errors.New("you can't do this to a custom emoji")
-	UnknownEmojiGuild = errors.New("the guild that this emoji comes from is not in the cache")
+	// ErrNotACustomEmoji gets thrown when a method gets called on an unicode emoji
+	// that can only be called on custom emojis
+	ErrNotACustomEmoji = errors.New("you can't do this to a custom emoji")
+
+	// ErrUnknownEmojiGuild gets thrown when the method requires the emoji to be from
+	// a guild that is cached, but it isn't
+	ErrUnknownEmojiGuild = errors.New("the guild that this emoji comes from is not in the cache")
 )
 
 // Emoji struct holds data related to Emoji's
@@ -80,11 +85,11 @@ func (e *Emoji) RoleObjects() (roles []*Role) {
 // Delete deletes the emoji
 func (e *Emoji) Delete() error {
 	if e.ID == "" {
-		return NotACustomEmoji
+		return ErrNotACustomEmoji
 	}
 
 	if e.Guild == nil {
-		return UnknownEmojiGuild
+		return ErrUnknownEmojiGuild
 	}
 
 	return e.Session.GuildEmojiDelete(e.Guild.ID, e.ID)
@@ -94,12 +99,12 @@ func (e *Emoji) Delete() error {
 // name :  the new name for the custom emoji
 func (e *Emoji) EditName(name string) (edited *Emoji, err error) {
 	if e.ID == "" {
-		err = NotACustomEmoji
+		err = ErrNotACustomEmoji
 		return
 	}
 
 	if e.Guild == nil {
-		err = UnknownEmojiGuild
+		err = ErrUnknownEmojiGuild
 		return
 	}
 
@@ -111,12 +116,12 @@ func (e *Emoji) EditName(name string) (edited *Emoji, err error) {
 // roles :  the list of roles to make the emoji exclusive to
 func (e *Emoji) LimitRoles(roles []*Role) (edited *Emoji, err error) {
 	if e.ID == "" {
-		err = NotACustomEmoji
+		err = ErrNotACustomEmoji
 		return
 	}
 
 	if e.Guild == nil {
-		err = UnknownEmojiGuild
+		err = ErrUnknownEmojiGuild
 		return
 	}
 
