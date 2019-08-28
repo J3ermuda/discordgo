@@ -1,6 +1,10 @@
 package discordgo
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"time"
+)
 
 var (
 	// ErrNotACustomEmoji gets thrown when a method gets called on an unicode emoji
@@ -42,9 +46,46 @@ type Emoji struct {
 	Guild *Guild `json:"-"`
 }
 
+// GetID returns the emoji's ID, this will be an empty string if the emoji is not custom
+func (e *Emoji) GetID() string {
+	return e.ID
+}
+
+// CreatedAt returns the emoji's creation time in UTC,
+// will return an error if the emoji is not custom
+func (e *Emoji) CreatedAt() (creation time.Time, err error) {
+	if !e.IsCustom() {
+		err = ErrNotACustomEmoji
+		return
+	}
+
+	return SnowflakeToTime(e.ID)
+}
+
+// IsEqual returns true if the other emoji has the same ID if they are both custom
+// and else true if they have the same name
+func (e *Emoji) IsEqual(other *Emoji) bool {
+	if e.IsCustom() != other.IsCustom() {
+		return false
+	} else if e.IsCustom() {
+		return e.ID == other.ID
+	}
+	return e.Name == other.Name
+}
+
 // IsCustom returns true if the emoji is a custom emoji
 func (e *Emoji) IsCustom() bool {
 	return e.ID != ""
+}
+
+// String renders the string needed to display the emoji correctly in discord
+func (e *Emoji) String() string {
+	if !e.IsCustom() {
+		return e.Name
+	} else if e.Animated {
+		return fmt.Sprintf("<a:%s:%s>", e.Name, e.ID)
+	}
+	return fmt.Sprintf("<:%s:%s>", e.Name, e.ID)
 }
 
 // MessageFormat returns a correctly formatted Emoji for use in Message content and embeds
