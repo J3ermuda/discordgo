@@ -295,7 +295,7 @@ func (m *Message) Pin() (err error) {
 	return m.Session.ChannelMessagePin(m.ChannelID, m.ID)
 }
 
-// Unpin unpins the message
+// UnPin unpins the message
 func (m *Message) UnPin() (err error) {
 	return m.Session.ChannelMessageUnpin(m.ChannelID, m.ID)
 }

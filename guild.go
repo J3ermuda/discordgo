@@ -152,6 +152,7 @@ type GuildParams struct {
 	Splash                      string             `json:"splash,omitempty"`
 }
 
+// GuildLimit stores the information about the limits for the guild that can be boosted
 type GuildLimit struct {
 	Emoji    Emoji
 	Bitrate  int
@@ -385,6 +386,7 @@ func (g *Guild) FileSizeLimit() int {
 	}
 }
 
+// DeleteInvite deletes the given invite from the guild
 func (g *Guild) DeleteInvite(inviteID string) (*Invite, error) {
 	return g.Session.InviteDelete(inviteID)
 }

@@ -154,7 +154,7 @@ func (u *User) SendMessageComplex(data *MessageSend) (message *Message, err erro
 	return u.DMChannel.SendMessageComplex(data)
 }
 
-// EditMessageComplex edits an existing message, replacing it entirely with
+// EditMessage edits an existing message, replacing it entirely with
 // the given MessageEdit struct
 func (u *User) EditMessage(data *MessageEdit) (edited *Message, err error) {
 	if u.DMChannel == nil {

@@ -27,7 +27,7 @@ func (r *MessageReaction) GetChannel() (c *Channel, err error) {
 	return r.Session.State.Channel(r.ChannelID)
 }
 
-// GetChannel retrieves the message that was reacted to
+// GetMessage retrieves the message that was reacted to
 func (r *MessageReaction) GetMessage() (m *Message, err error) {
 	m, err = r.Session.State.Message(r.ChannelID, r.MessageID)
 	if err == nil {

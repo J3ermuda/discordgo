@@ -6,13 +6,17 @@ import (
 	"time"
 )
 
-// ErrNotATextChannel gets returned when an action gets called on a channel
+// ErrNotATextChannel gets returned when a method gets called on a channel
 // that does not support sending messages to them
 var ErrNotATextChannel = errors.New("not a text or dm channel")
 
-// ErrNotAVoiceChannel gets thrown when an action gets called on a channel
-// that is not a Guild Voice channel
+// ErrNotAVoiceChannel gets thrown when a method gets called on a channel
+// that is not a Guild Voice channel but does need to be for the method to work
 var ErrNotAVoiceChannel = errors.New("not a voice channel")
+
+// ErrNotAGuildChannel gets thrown when a method gets called on a channel
+// that is not inside of a Guild but does need to be for the method to work
+var ErrNotAGuildChannel = errors.New("not a channel in a guild")
 
 // ChannelType is the type of a Channel
 type ChannelType int
@@ -101,9 +105,14 @@ func (c *Channel) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(c.ID)
 }
 
-func (c *Channel) Guild() *Guild {
-	g, _ := c.Session.State.Guild(c.GuildID)
-	return g
+// Guild retrieves the guild belonging to the channel
+func (c *Channel) Guild() (g *Guild, err error) {
+	if c.GuildID == "" {
+		err = ErrNotAGuildChannel
+		return
+	}
+
+	return c.Session.State.Guild(c.GuildID)
 }
 
 // A ChannelEdit holds Channel Field data for a channel edit.
@@ -157,7 +166,7 @@ func (c *Channel) SendMessageComplex(data *MessageSend) (message *Message, err e
 	return c.Session.ChannelMessageSendComplex(c.ID, data)
 }
 
-// EditMessageComplex edits an existing message, replacing it entirely with
+// EditMessage edits an existing message, replacing it entirely with
 // the given MessageEdit struct
 func (c *Channel) EditMessage(data *MessageEdit) (edited *Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
@@ -216,7 +225,7 @@ func (c *Channel) DeleteMessageByID(ID string) (err error) {
 	return c.Session.ChannelMessageDelete(c.ID, ID)
 }
 
-// ChannelMessagesBulkDelete bulk deletes the messages from the channel for the provided message objects.
+// MessagesBulkDelete bulk deletes the messages from the channel for the provided message objects.
 // messages  : The messages to be deleted. A slice of message objects. A maximum of 100 messages.
 func (c *Channel) MessagesBulkDelete(messages []*Message) (err error) {
 	if len(messages) == 0 {
@@ -259,7 +268,7 @@ func (c *Channel) MessagesBulkDelete(messages []*Message) (err error) {
 	return
 }
 
-// ChannelMessagesBulkDelete bulk deletes the messages from the channel for the provided messageIDs.
+// MessagesBulkDelete bulk deletes the messages from the channel for the provided messageIDs.
 // If only one messageID is in the slice call channelMessageDelete function.
 // If the slice is empty do nothing.
 // messages  : The IDs of the messages to be deleted. A slice of string IDs. A maximum of 100 messages.

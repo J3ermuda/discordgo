@@ -199,6 +199,7 @@ func (i *Invite) build(s *Session) {
 	}
 }
 
+// Delete deletes the invite
 func (i *Invite) Delete() (err error) {
 	_, err = i.Guild.DeleteInvite(i.Code)
 	return

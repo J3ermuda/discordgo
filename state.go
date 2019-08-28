@@ -414,7 +414,7 @@ func (s *State) Member(guildID, userID string) (*Member, error) {
 	return nil, ErrStateNotFound
 }
 
-// User retrieves a user from the cache by ID
+// GetUser retrieves a user from the cache by ID
 func (s *State) GetUser(userID string) (*User, error) {
 	if s == nil {
 		return nil, ErrNilState
