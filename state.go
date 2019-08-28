@@ -44,6 +44,7 @@ type State struct {
 	guildMap   map[string]*Guild
 	channelMap map[string]*Channel
 	memberMap  map[string]map[string]*Member
+	userMap    map[string]*User
 }
 
 // NewState creates an empty state.
@@ -62,6 +63,33 @@ func NewState() *State {
 		guildMap:       make(map[string]*Guild),
 		channelMap:     make(map[string]*Channel),
 		memberMap:      make(map[string]map[string]*Member),
+		userMap:        make(map[string]*User),
+	}
+}
+
+func (s *State) addUser(guildID string, user *User) {
+	if _, ok := s.userMap[user.ID]; !ok {
+		s.userMap[user.ID] = user
+	}
+
+	if !Contains(s.userMap[user.ID].guilds, guildID) {
+		s.userMap[user.ID].guilds = append(s.userMap[user.ID].guilds, guildID)
+	}
+
+	user.guilds = s.userMap[user.ID].guilds
+}
+
+func (s *State) removeUser(guildID, userID string) {
+	if u, ok := s.userMap[userID]; ok {
+		for i := 0; i < len(u.guilds); i++ {
+			if u.guilds[i] == guildID {
+				u.guilds = append(u.guilds[:i], u.guilds[i+1:]...)
+				i--
+			}
+		}
+		if len(u.guilds) == 0 {
+			delete(s.userMap, userID)
+		}
 	}
 }
 
@@ -69,6 +97,7 @@ func (s *State) createMemberMap(guild *Guild) {
 	members := make(map[string]*Member)
 	for _, m := range guild.Members {
 		members[m.User.ID] = m
+		s.addUser(guild.ID, m.User)
 	}
 	s.memberMap[guild.ID] = members
 }
@@ -149,6 +178,11 @@ func (s *State) GuildRemove(guild *Guild) error {
 	defer s.Unlock()
 
 	delete(s.guildMap, guild.ID)
+
+	for _, m := range guild.Members {
+		s.removeUser(guild.ID, m.User.ID)
+	}
+	delete(s.memberMap, guild.ID)
 
 	for i, g := range s.Guilds {
 		if g.ID == guild.ID {
@@ -316,6 +350,8 @@ func (s *State) MemberAdd(member *Member, se *Session) error {
 		*m = *member
 	}
 
+	s.addUser(member.GuildID, member.User)
+
 	return nil
 }
 
@@ -332,6 +368,8 @@ func (s *State) MemberRemove(member *Member) error {
 
 	s.Lock()
 	defer s.Unlock()
+
+	s.removeUser(member.GuildID, member.User.ID)
 
 	members, ok := s.memberMap[member.GuildID]
 	if !ok {
@@ -374,6 +412,22 @@ func (s *State) Member(guildID, userID string) (*Member, error) {
 	}
 
 	return nil, ErrStateNotFound
+}
+
+// User retrieves a user from the cache by ID
+func (s *State) GetUser(userID string) (*User, error) {
+	if s == nil {
+		return nil, ErrNilState
+	}
+
+	s.RLock()
+	defer s.RUnlock()
+
+	user, ok := s.userMap[userID]
+	if !ok {
+		return nil, ErrStateNotFound
+	}
+	return user, nil
 }
 
 // RoleAdd adds a role to the current world state, or

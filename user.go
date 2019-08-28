@@ -45,6 +45,9 @@ type User struct {
 
 	// The Session to call the API and retrieve other objects
 	Session *Session `json:"session,omitempty"`
+
+	// guilds the user is in; used for caching
+	guilds []string
 }
 
 // String returns a unique identifier of the form username#discriminator
