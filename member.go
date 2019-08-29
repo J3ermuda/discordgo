@@ -34,22 +34,22 @@ type Member struct {
 }
 
 // String returns a unique identifier of the form username#discriminator
-func (m *Member) String() string {
+func (m Member) String() string {
 	return m.User.String()
 }
 
 // GetID returns the members ID
-func (m *Member) GetID() string {
+func (m Member) GetID() string {
 	return m.User.ID
 }
 
 // CreatedAt returns the members creation time in UTC
-func (m *Member) CreatedAt() (creation time.Time, err error) {
+func (m Member) CreatedAt() (creation time.Time, err error) {
 	return m.User.CreatedAt()
 }
 
 // Mention creates a member mention
-func (m *Member) Mention() string {
+func (m Member) Mention() string {
 	if m.Nick != "" {
 		return "<@!" + m.User.ID + ">"
 	}
@@ -63,11 +63,11 @@ func (m *Member) IsMentionedIn(message *Message) bool {
 		return true
 	}
 
-	roles, err := m.GetRoles()
+	rRoles, err := m.GetRoles()
 	if err != nil {
 		return false
 	}
-	roles = Roles(roles)
+	roles := Roles(rRoles)
 
 	for _, roleID := range message.MentionRoles {
 		if roles.ContainsID(roleID) {
@@ -100,21 +100,23 @@ func (m *Member) GetGuild() (g *Guild, err error) {
 }
 
 // GetRoles returns a slice with all roles the Member has, sorted from highest to lowest
-func (m *Member) GetRoles() (roles Roles, err error) {
+func (m *Member) GetRoles() (roles []*Role, err error) {
 	g, err := m.GetGuild()
 	if err != nil {
 		return
 	}
 
+	var base Roles
 	for _, roleID := range m.Roles {
 		r, errGR := g.GetRole(roleID)
 		if errGR != nil {
 			err = errGR
 			return
 		}
-		roles = append(roles, r)
+		base = append(base, r)
 	}
-	sort.Sort(roles)
+	sort.Sort(base)
+	roles = append(roles, base...)
 	return
 }
 

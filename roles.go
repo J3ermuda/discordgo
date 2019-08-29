@@ -35,7 +35,7 @@ type Role struct {
 	// The permissions of the role on the guild (doesn't include channel overrides).
 	// This is a combination of bit masks; the presence of a certain permission can
 	// be checked by performing a bitwise AND between this int and the permission.
-	Permissions int `json:"permissions"`
+	Permissions *Permissions `json:"permissions"`
 
 	// ID of the guild this role belongs to
 	Guild *Guild `json:"-"`
@@ -72,17 +72,17 @@ type RoleMove struct {
 }
 
 // GetID returns the ID of the Role
-func (r *Role) GetID() string {
+func (r Role) GetID() string {
 	return r.ID
 }
 
 // CreatedAt returns the roles creation time in UTC
-func (r *Role) CreatedAt() (creation time.Time, err error) {
+func (r Role) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(r.ID)
 }
 
 // Mention returns a string which mentions the role
-func (r *Role) Mention() string {
+func (r Role) Mention() string {
 	return fmt.Sprintf("<@&%s>", r.ID)
 }
 

@@ -51,22 +51,22 @@ type User struct {
 }
 
 // String returns a unique identifier of the form username#discriminator
-func (u *User) String() string {
+func (u User) String() string {
 	return u.Username + "#" + u.Discriminator
 }
 
 // Mention return a string which mentions the user
-func (u *User) Mention() string {
+func (u User) Mention() string {
 	return "<@" + u.ID + ">"
 }
 
 // GetID returns the users ID
-func (u *User) GetID() string {
+func (u User) GetID() string {
 	return u.ID
 }
 
 // CreatedAt returns the users creation time in UTC
-func (u *User) CreatedAt() (creation time.Time, err error) {
+func (u User) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(u.ID)
 }
 
@@ -130,7 +130,7 @@ func (u *User) CreateDM() (err error) {
 // content         : message content to send if provided
 // embed           : embed to attach to the message if provided
 // files           : files to attach to the message if provided
-func (u *User) SendMessage(content string, embed *MessageEmbed, files []*File) (message *Message, err error) {
+func (u User) SendMessage(content string, embed *MessageEmbed, files []*File) (message *Message, err error) {
 	if u.DMChannel == nil {
 		err = u.CreateDM()
 		if err != nil {
@@ -143,7 +143,7 @@ func (u *User) SendMessage(content string, embed *MessageEmbed, files []*File) (
 
 // SendMessageComplex sends a message to the user
 // data          : MessageSend object with the data to send
-func (u *User) SendMessageComplex(data *MessageSend) (message *Message, err error) {
+func (u User) SendMessageComplex(data *MessageSend) (message *Message, err error) {
 	if u.DMChannel == nil {
 		err = u.CreateDM()
 		if err != nil {
@@ -156,7 +156,7 @@ func (u *User) SendMessageComplex(data *MessageSend) (message *Message, err erro
 
 // EditMessage edits an existing message, replacing it entirely with
 // the given MessageEdit struct
-func (u *User) EditMessage(data *MessageEdit) (edited *Message, err error) {
+func (u User) EditMessage(data *MessageEdit) (edited *Message, err error) {
 	if u.DMChannel == nil {
 		err = u.CreateDM()
 		if err != nil {
@@ -169,7 +169,7 @@ func (u *User) EditMessage(data *MessageEdit) (edited *Message, err error) {
 
 // FetchMessage fetches a message with the given ID from the channel
 // ID        : ID of the message to fetch
-func (u *User) FetchMessage(id string) (message *Message, err error) {
+func (u User) FetchMessage(id string) (message *Message, err error) {
 	if u.DMChannel == nil {
 		err = u.CreateDM()
 		if err != nil {
@@ -185,6 +185,6 @@ func (u *User) FetchMessage(id string) (message *Message, err error) {
 // beforeID  : If provided all messages returned will be before given ID.
 // afterID   : If provided all messages returned will be after given ID.
 // aroundID  : If provided all messages returned will be around given ID.
-func (u *User) GetHistory(limit int, beforeID, afterID, aroundID string) (st []*Message, err error) {
+func (u User) GetHistory(limit int, beforeID, afterID, aroundID string) (st []*Message, err error) {
 	return u.Session.ChannelMessages(u.DMChannel.ID, limit, beforeID, afterID, aroundID)
 }

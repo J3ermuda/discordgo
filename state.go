@@ -1028,37 +1028,6 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 	return
 }
 
-// UserChannelPermissions returns the permission of a user in a channel.
-// userID    : The ID of the user to calculate permissions for.
-// channelID : The ID of the channel to calculate permission for.
-func (s *State) UserChannelPermissions(userID, channelID string) (apermissions int, err error) {
-	if s == nil {
-		return 0, ErrNilState
-	}
-
-	channel, err := s.Channel(channelID)
-	if err != nil {
-		return
-	}
-
-	guild, err := s.Guild(channel.GuildID)
-	if err != nil {
-		return
-	}
-
-	if userID == guild.OwnerID {
-		apermissions = PermissionAll
-		return
-	}
-
-	member, err := s.Member(guild.ID, userID)
-	if err != nil {
-		return
-	}
-
-	return memberPermissions(guild, channel, member), nil
-}
-
 // UserColor returns the color of a user in a channel.
 // While colors are defined at a Guild level, determining for a channel is more useful in message handlers.
 // 0 is returned in cases of error, which is the color of @everyone.

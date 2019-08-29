@@ -133,12 +133,12 @@ type MessageEdit struct {
 }
 
 // GetID returns the ID of the message
-func (m *Message) GetID() string {
+func (m Message) GetID() string {
 	return m.ID
 }
 
 // CreatedAt returns the messages creation time in UTC
-func (m *Message) CreatedAt() (creation time.Time, err error) {
+func (m Message) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(m.ID)
 }
 

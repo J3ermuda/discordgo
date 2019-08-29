@@ -47,13 +47,13 @@ type Emoji struct {
 }
 
 // GetID returns the emoji's ID, this will be an empty string if the emoji is not custom
-func (e *Emoji) GetID() string {
+func (e Emoji) GetID() string {
 	return e.ID
 }
 
 // CreatedAt returns the emoji's creation time in UTC,
 // will return an error if the emoji is not custom
-func (e *Emoji) CreatedAt() (creation time.Time, err error) {
+func (e Emoji) CreatedAt() (creation time.Time, err error) {
 	if !e.IsCustom() {
 		err = ErrNotACustomEmoji
 		return
