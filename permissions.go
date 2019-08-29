@@ -91,7 +91,7 @@ const (
 		PermissionChangeNickname
 )
 
-// Permission is a type around the int value of a discord permission
+// Permissions is a type around the int value of a discord permission
 type Permissions int
 
 // IsSuperset returns true if the permissions object has the same or fewer permissions as other.

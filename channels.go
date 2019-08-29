@@ -381,9 +381,8 @@ func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwri
 
 	if overwrite != nil {
 		return c.Session.ChannelPermissionSet(c.ID, target.GetID(), permType, int(*overwrite.Allow), int(*overwrite.Deny))
-	} else {
-		return c.Session.ChannelPermissionDelete(c.ID, target.GetID())
 	}
+	return c.Session.ChannelPermissionDelete(c.ID, target.GetID())
 }
 
 // Delete deletes the channel
