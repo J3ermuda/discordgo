@@ -91,17 +91,17 @@ type Channel struct {
 }
 
 // Mention returns a string which mentions the channel
-func (c *Channel) Mention() string {
+func (c Channel) Mention() string {
 	return fmt.Sprintf("<#%s>", c.ID)
 }
 
 // GetID returns the ID of the channel
-func (c *Channel) GetID() string {
+func (c Channel) GetID() string {
 	return c.ID
 }
 
 // CreatedAt returns the channels creation time in UTC
-func (c *Channel) CreatedAt() (creation time.Time, err error) {
+func (c Channel) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(c.ID)
 }
 
@@ -128,19 +128,11 @@ type ChannelEdit struct {
 	RateLimitPerUser     int                    `json:"rate_limit_per_user,omitempty"`
 }
 
-// A PermissionOverwrite holds permission overwrite data for a Channel
-type PermissionOverwrite struct {
-	ID    string `json:"id"`
-	Type  string `json:"type"`
-	Deny  int    `json:"deny"`
-	Allow int    `json:"allow"`
-}
-
 // SendMessage sends a message to the channel
 // content         : message content to send if provided
 // embed           : embed to attach to the message if provided
 // files           : files to attach to the message if provided
-func (c *Channel) SendMessage(content string, embed *MessageEmbed, files []*File) (message *Message, err error) {
+func (c Channel) SendMessage(content string, embed *MessageEmbed, files []*File) (message *Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
 		err = ErrNotATextChannel
 		return
@@ -157,7 +149,7 @@ func (c *Channel) SendMessage(content string, embed *MessageEmbed, files []*File
 
 // SendMessageComplex sends a message to the channel
 // data          : MessageSend object with the data to send
-func (c *Channel) SendMessageComplex(data *MessageSend) (message *Message, err error) {
+func (c Channel) SendMessageComplex(data *MessageSend) (message *Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
 		err = ErrNotATextChannel
 		return
@@ -168,7 +160,7 @@ func (c *Channel) SendMessageComplex(data *MessageSend) (message *Message, err e
 
 // EditMessage edits an existing message, replacing it entirely with
 // the given MessageEdit struct
-func (c *Channel) EditMessage(data *MessageEdit) (edited *Message, err error) {
+func (c Channel) EditMessage(data *MessageEdit) (edited *Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
 		err = ErrNotATextChannel
 		return
@@ -180,7 +172,7 @@ func (c *Channel) EditMessage(data *MessageEdit) (edited *Message, err error) {
 
 // FetchMessage fetches a message with the given ID from the channel
 // ID        : ID of the message to fetch
-func (c *Channel) FetchMessage(ID string) (message *Message, err error) {
+func (c Channel) FetchMessage(ID string) (message *Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
 		err = ErrNotATextChannel
 		return
@@ -194,7 +186,7 @@ func (c *Channel) FetchMessage(ID string) (message *Message, err error) {
 // beforeID  : If provided all messages returned will be before given ID.
 // afterID   : If provided all messages returned will be after given ID.
 // aroundID  : If provided all messages returned will be around given ID.
-func (c *Channel) GetHistory(limit int, beforeID, afterID, aroundID string) (st []*Message, err error) {
+func (c Channel) GetHistory(limit int, beforeID, afterID, aroundID string) (st []*Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
 		err = ErrNotATextChannel
 		return
@@ -293,4 +285,114 @@ func (c *Channel) MessagesBulkDeleteByID(messages []string) (err error) {
 
 	_, err = c.Session.RequestWithBucketID("POST", EndpointChannelMessagesBulkDelete(c.ID), data, EndpointChannelMessagesBulkDelete(c.ID))
 	return
+}
+
+// PermissionsFor calculates the permissions that the member has in the channel,
+// taking into account the following cases:
+// - Guild owner
+// - Guild roles
+// - Channel overrides
+// - Member overrides
+func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
+	g, err := c.Guild()
+	if err != nil {
+		return
+	}
+
+	if g.OwnerID == m.GetID() {
+		perms = NewAllPermissions()
+		return
+	}
+
+	perms = *g.GetDefaultRole().Permissions
+	roles, err := m.GetRoles()
+	if err != nil {
+		return
+	}
+
+	for _, role := range roles {
+		perms = perms | *role.Permissions
+	}
+
+	if perms.Has(PermissionAdministrator) {
+		perms = NewAllPermissions()
+		return
+	}
+
+	var remainingOverwrites []*PermissionOverwrite
+	if len(c.PermissionOverwrites) > 0 {
+		maybeEveryone := c.PermissionOverwrites[0]
+		if maybeEveryone.ID == g.ID {
+			perms.HandleOverwrite(*maybeEveryone.Allow, *maybeEveryone.Deny)
+			if len(c.PermissionOverwrites) > 1 {
+				remainingOverwrites = c.PermissionOverwrites[1:]
+			}
+		} else {
+			remainingOverwrites = c.PermissionOverwrites
+		}
+	}
+
+	denies := Permissions(0)
+	allows := Permissions(0)
+
+	for _, overwrite := range remainingOverwrites {
+		if overwrite.Type == "role" && Contains(m.Roles, overwrite.ID) {
+			denies = denies | *overwrite.Deny
+			allows = allows | *overwrite.Allow
+		}
+	}
+
+	perms.HandleOverwrite(allows, denies)
+
+	for _, overwrite := range remainingOverwrites {
+		if overwrite.Type == "member" && overwrite.ID == m.GetID() {
+			perms.HandleOverwrite(*overwrite.Allow, *overwrite.Deny)
+			break
+		}
+	}
+
+	if !perms.Has(PermissionSendMessages) {
+		perms.Set(PermissionSendTTSMessages, false)
+		perms.Set(PermissionMentionEveryone, false)
+		perms.Set(PermissionEmbedLinks, false)
+		perms.Set(PermissionAttachFiles, false)
+	}
+
+	if !perms.Has(PermissionReadMessages) {
+		perms = perms &^ NewAllChannelPermissions()
+	}
+
+	return
+}
+
+// SetPermissions sets or deletes a permission overwrite on the channel
+func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwrite) (err error) {
+	var permType string
+	switch target.(type) {
+	case User:
+		permType = "member"
+	case Member:
+		permType = "member"
+	case Role:
+		permType = "role"
+	default:
+		err = errors.New("target parameter must be either a user, member or a role")
+	}
+
+	if overwrite != nil {
+		return c.Session.ChannelPermissionSet(c.ID, target.GetID(), permType, int(*overwrite.Allow), int(*overwrite.Deny))
+	}
+	return c.Session.ChannelPermissionDelete(c.ID, target.GetID())
+}
+
+// Delete deletes the channel
+func (c *Channel) Delete() (err error) {
+	_, err = c.Session.ChannelDelete(c.ID)
+	return
+}
+
+// CreateInvite creates an invite
+// TODO: make a special object to create invites with
+func (c *Channel) CreateInvite(data Invite) (i *Invite, err error) {
+	return c.Session.ChannelInviteCreate(c.ID, data)
 }

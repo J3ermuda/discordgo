@@ -390,3 +390,13 @@ func (g *Guild) FileSizeLimit() int {
 func (g *Guild) DeleteInvite(inviteID string) (*Invite, error) {
 	return g.Session.InviteDelete(inviteID)
 }
+
+// GetDefaultRole gets the @everyone role that everyone has by default
+func (g *Guild) GetDefaultRole() *Role {
+	for _, role := range g.Roles {
+		if role.IsDefault() {
+			return role
+		}
+	}
+	return nil
+}
