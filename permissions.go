@@ -1,5 +1,6 @@
 package discordgo
 
+// PermissionOffset is used to denote how large the bit offset is for a permission
 type PermissionOffset uint
 
 // Constants for the different bit offsets of text channel permissions
@@ -90,6 +91,7 @@ const (
 		PermissionChangeNickname
 )
 
+// Permission is a type around the int value of a discord permission
 type Permissions int
 
 // IsSuperset returns true if the permissions object has the same or fewer permissions as other.
@@ -97,7 +99,7 @@ func (p *Permissions) IsSuperset(other *Permissions) bool {
 	return (*p | *other) == *p
 }
 
-// IsSuperset returns true if the permissions object has the same or more permissions as other.
+// IsSubset returns true if the permissions object has the same or more permissions as other.
 func (p *Permissions) IsSubset(other *Permissions) bool {
 	return (*p & *other) == *p
 }

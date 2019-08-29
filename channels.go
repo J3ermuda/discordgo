@@ -365,6 +365,7 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 	return
 }
 
+// SetPermissions sets or deletes a permission overwrite on the channel
 func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwrite) (err error) {
 	var permType string
 	switch target.(type) {
@@ -378,7 +379,11 @@ func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwri
 		err = errors.New("target parameter must be either a user, member or a role")
 	}
 
-	return c.Session.ChannelPermissionSet(c.ID, target.GetID(), permType, int(*overwrite.Allow), int(*overwrite.Deny))
+	if overwrite != nil {
+		return c.Session.ChannelPermissionSet(c.ID, target.GetID(), permType, int(*overwrite.Allow), int(*overwrite.Deny))
+	} else {
+		return c.Session.ChannelPermissionDelete(c.ID, target.GetID())
+	}
 }
 
 // Delete deletes the channel
