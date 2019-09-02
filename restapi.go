@@ -834,7 +834,7 @@ func (s *Session) GuildRoleCreate(guildID string) (st *Role, err error) {
 // hoist     : Whether to display the role's users separately.
 // perm      : The permissions for the role.
 // mention   : Whether this role is mentionable
-func (s *Session) GuildRoleEdit(guildID, roleID, name string, color int, hoist bool, perm int, mention bool) (st *Role, err error) {
+func (s *Session) GuildRoleEdit(guildID, roleID, name string, color int, hoist bool, perm *Permissions, mention bool) (st *Role, err error) {
 	data := &RoleEdit{name, color, hoist, perm, mention}
 
 	return s.GuildRoleEditComplex(guildID, roleID, data)

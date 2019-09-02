@@ -111,15 +111,15 @@ func (p *Permissions) HandleOverwrite(allow, deny Permissions) Permissions {
 
 // Has returns if the Permissions object has a certain permission
 func (p *Permissions) Has(perm PermissionOffset) bool {
-	return (int(*p)>>uint(perm))&1 == 1
+	return uint(*p)&uint(perm) == uint(perm)
 }
 
 // Set sets a permission on the Permissions object
 func (p *Permissions) Set(perm PermissionOffset, value bool) {
 	if value {
-		*p = Permissions(int(*p) | (1 << uint(perm)))
+		*p = Permissions(uint(*p) | uint(perm))
 	} else {
-		*p = Permissions(int(*p) &^ (1 << uint(perm)))
+		*p = Permissions(uint(*p) &^ uint(perm))
 	}
 }
 
