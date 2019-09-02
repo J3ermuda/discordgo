@@ -212,11 +212,24 @@ func TestHandlerSessionInserter(t *testing.T) {
 		t.Fatalf("Guild %s is still unavailable", envGuild)
 	}
 
-	testHandler := func(s *Session, c *ChannelCreate) {
+	done := make(chan bool, 1)
+
+	testChannelHandler := func(s *Session, c *ChannelCreate) {
 		_, _ = c.SendMessage("OwO A new channel was made", nil, nil)
 	}
 
-	r := dg.AddHandler(testHandler)
+	testMessageHandler := func(s *Session, m *MessageCreate) {
+		_, _ = m.Edit(m.NewMessageEdit().SetContent("OwO message received and edited"))
+	}
+
+	testMessageUpdateHandler := func(s *Session, m *MessageUpdate) {
+		_ = m.AddReaction(&Emoji{Name: "❤"})
+		done <- true
+	}
+
+	r := dg.AddHandler(testChannelHandler)
+	m := dg.AddHandler(testMessageHandler)
+	u := dg.AddHandler(testMessageUpdateHandler)
 
 	_, err = g.CreateChannel("TestChannel", ChannelTypeGuildText)
 	if err != nil {
@@ -224,6 +237,11 @@ func TestHandlerSessionInserter(t *testing.T) {
 		return
 	}
 
-	<-time.After(1000 * time.Millisecond)
+	select {
+	case <-time.After(20000 * time.Millisecond):
+	case <-done:
+	}
 	r()
+	m()
+	u()
 }

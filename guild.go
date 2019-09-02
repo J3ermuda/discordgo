@@ -207,8 +207,8 @@ func (g *Guild) GetRoleNamed(name string) (role *Role, err error) {
 
 // GetChannel gets the channel with the given ID as it is stored in Guild.Channels
 // channelID    : The ID of the channel to search for
-func (g *Guild) GetChannel(channelID string) (role *Channel, err error) {
-	for _, channel := range g.Channels {
+func (g *Guild) GetChannel(channelID string) (channel *Channel, err error) {
+	for _, channel = range g.Channels {
 		if channel.ID == channelID {
 			return
 		}

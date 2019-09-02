@@ -686,15 +686,6 @@ func (s *State) MessageAdd(message *Message, se *Session) error {
 		return err
 	}
 
-	message.Session = se
-	message.Author.Session = se
-	if message.Member != nil {
-		message.Member.User.Session = se
-	}
-	for _, u := range message.Mentions {
-		u.Session = se
-	}
-
 	s.Lock()
 	defer s.Unlock()
 
@@ -939,6 +930,9 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		for _, e := range t.Emojis {
 			e.Session = se
 			e.Guild = g
+			if e.User != nil {
+				e.User.Session = se
+			}
 		}
 		if s.TrackEmojis {
 			err = s.EmojisAdd(t.GuildID, t.Emojis)
@@ -954,14 +948,37 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 			err = s.ChannelAdd(t.Channel)
 		}
 	case *ChannelDelete:
+		t.Channel.Session = se
 		if s.TrackChannels {
 			err = s.ChannelRemove(t.Channel)
 		}
 	case *MessageCreate:
+		t.Message.Session = se
+		if t.Message.Author != nil {
+			t.Message.Author.Session = se
+			if t.Message.Member != nil {
+				t.Message.Member.User = t.Message.Author
+			}
+		}
+		for _, u := range t.Message.Mentions {
+			u.Session = se
+		}
+
 		if s.MaxMessageCount != 0 {
 			err = s.MessageAdd(t.Message, se)
 		}
 	case *MessageUpdate:
+		t.Message.Session = se
+		if t.Message.Author != nil {
+			t.Message.Author.Session = se
+			if t.Message.Member != nil {
+				t.Message.Member.User = t.Message.Author
+			}
+		}
+		for _, u := range t.Message.Mentions {
+			u.Session = se
+		}
+
 		if s.MaxMessageCount != 0 {
 			err = s.MessageAdd(t.Message, se)
 		}

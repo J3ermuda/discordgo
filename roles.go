@@ -56,7 +56,7 @@ type RoleEdit struct {
 	Hoist bool `json:"hoist"`
 
 	// The overall permissions number of the role (overwrites existing)
-	Permissions int `json:"permissions"`
+	Permissions *Permissions `json:"permissions"`
 
 	// Whether this role is mentionable (overwrites existing)
 	Mentionable bool `json:"mentionable"`
@@ -110,7 +110,7 @@ func (r *Role) GetMembers() (members []*Member, err error) {
 // hoist     : Whether to display the role's users separately.
 // perm      : The permissions for the role.
 // mention   : Whether this role is mentionable
-func (r *Role) Edit(name string, color int, hoist bool, perm int, mention bool) (edited *Role, err error) {
+func (r *Role) Edit(name string, color int, hoist bool, perm *Permissions, mention bool) (edited *Role, err error) {
 	return r.Session.GuildRoleEdit(r.Guild.ID, r.ID, name, color, hoist, perm, mention)
 }
 
