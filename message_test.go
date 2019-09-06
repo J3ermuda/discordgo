@@ -85,9 +85,14 @@ func TestEmbed(t *testing.T) {
 		NewEmbed().
 			SetDescription("testing the ability to make and send embeds").
 			SetAuthorName("Library Tester").
+			SetColor(ColorBlue).
 			SetTitle("Embed Test").
 			SetFooterText("t-t-testiiing").
-			SetImage("https://imgur.com/KAHPV0d.gif"),
+			SetImage("https://imgur.com/KAHPV0d.gif").
+			SetTimestampNow(),
 		nil,
 	)
+	if err != nil {
+		t.Fatalf("sending embed failed with %s", err)
+	}
 }

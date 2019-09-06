@@ -304,14 +304,14 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 		return
 	}
 
-	perms = *g.GetDefaultRole().Permissions
+	perms = g.GetDefaultRole().Permissions
 	roles, err := m.GetRoles()
 	if err != nil {
 		return
 	}
 
 	for _, role := range roles {
-		perms = perms | *role.Permissions
+		perms = perms | role.Permissions
 	}
 
 	if perms.Has(PermissionAdministrator) {
@@ -323,7 +323,7 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 	if len(c.PermissionOverwrites) > 0 {
 		maybeEveryone := c.PermissionOverwrites[0]
 		if maybeEveryone.ID == g.ID {
-			perms.HandleOverwrite(*maybeEveryone.Allow, *maybeEveryone.Deny)
+			perms.HandleOverwrite(maybeEveryone.Allow, maybeEveryone.Deny)
 			if len(c.PermissionOverwrites) > 1 {
 				remainingOverwrites = c.PermissionOverwrites[1:]
 			}
@@ -337,8 +337,8 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 
 	for _, overwrite := range remainingOverwrites {
 		if overwrite.Type == "role" && Contains(m.Roles, overwrite.ID) {
-			denies = denies | *overwrite.Deny
-			allows = allows | *overwrite.Allow
+			denies = denies | overwrite.Deny
+			allows = allows | overwrite.Allow
 		}
 	}
 
@@ -346,7 +346,7 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 
 	for _, overwrite := range remainingOverwrites {
 		if overwrite.Type == "member" && overwrite.ID == m.GetID() {
-			perms.HandleOverwrite(*overwrite.Allow, *overwrite.Deny)
+			perms.HandleOverwrite(overwrite.Allow, overwrite.Deny)
 			break
 		}
 	}
@@ -380,7 +380,7 @@ func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwri
 	}
 
 	if overwrite != nil {
-		return c.Session.ChannelPermissionSet(c.ID, target.GetID(), permType, int(*overwrite.Allow), int(*overwrite.Deny))
+		return c.Session.ChannelPermissionSet(c.ID, target.GetID(), permType, overwrite.Allow, overwrite.Deny)
 	}
 	return c.Session.ChannelPermissionDelete(c.ID, target.GetID())
 }

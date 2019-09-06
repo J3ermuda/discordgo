@@ -834,7 +834,7 @@ func (s *Session) GuildRoleCreate(guildID string) (st *Role, err error) {
 // hoist     : Whether to display the role's users separately.
 // perm      : The permissions for the role.
 // mention   : Whether this role is mentionable
-func (s *Session) GuildRoleEdit(guildID, roleID, name string, color int, hoist bool, perm *Permissions, mention bool) (st *Role, err error) {
+func (s *Session) GuildRoleEdit(guildID, roleID, name string, color Color, hoist bool, perm Permissions, mention bool) (st *Role, err error) {
 	data := &RoleEdit{name, color, hoist, perm, mention}
 
 	return s.GuildRoleEditComplex(guildID, roleID, data)
@@ -1703,13 +1703,13 @@ func (s *Session) ChannelInviteCreate(channelID string, i Invite) (st *Invite, e
 // ChannelPermissionSet creates a Permission Override for the given channel.
 // NOTE: This func name may changed.  Using Set instead of Create because
 // you can both create a new override or update an override with this function.
-func (s *Session) ChannelPermissionSet(channelID, targetID, targetType string, allow, deny int) (err error) {
+func (s *Session) ChannelPermissionSet(channelID, targetID, targetType string, allow, deny Permissions) (err error) {
 
 	data := struct {
-		ID    string `json:"id"`
-		Type  string `json:"type"`
-		Allow int    `json:"allow"`
-		Deny  int    `json:"deny"`
+		ID    string      `json:"id"`
+		Type  string      `json:"type"`
+		Allow Permissions `json:"allow"`
+		Deny  Permissions `json:"deny"`
 	}{targetID, targetType, allow, deny}
 
 	_, err = s.RequestWithBucketID("PUT", EndpointChannelPermission(channelID, targetID), data, EndpointChannelPermission(channelID, ""))

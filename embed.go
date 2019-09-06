@@ -1,5 +1,7 @@
 package discordgo
 
+import "time"
+
 // MessageEmbedFooter is a part of a MessageEmbed struct.
 type MessageEmbedFooter struct {
 	Text         string `json:"text,omitempty"`
@@ -59,7 +61,7 @@ type MessageEmbed struct {
 	Title       string                 `json:"title,omitempty"`
 	Description string                 `json:"description,omitempty"`
 	Timestamp   string                 `json:"timestamp,omitempty"`
-	Color       int                    `json:"color,omitempty"`
+	Color       Color                  `json:"color,omitempty"`
 	Footer      *MessageEmbedFooter    `json:"footer,omitempty"`
 	Image       *MessageEmbedImage     `json:"image,omitempty"`
 	Thumbnail   *MessageEmbedThumbnail `json:"thumbnail,omitempty"`
@@ -90,7 +92,7 @@ func (e *MessageEmbed) SetTitle(title string) *MessageEmbed {
 
 // SetColor can be used to set the embed color in a chain
 // color :   the embed color
-func (e *MessageEmbed) SetColor(c int) *MessageEmbed {
+func (e *MessageEmbed) SetColor(c Color) *MessageEmbed {
 	e.Color = c
 	return e
 }
@@ -195,5 +197,17 @@ func (e *MessageEmbed) SetThumbnail(url string) *MessageEmbed {
 	e.Thumbnail = &MessageEmbedThumbnail{
 		URL: url,
 	}
+	return e
+}
+
+// SetTimestamp sets the embed timestamp to a custom value
+func (e *MessageEmbed) SetTimestamp(timeStamp time.Time) *MessageEmbed {
+	e.Timestamp = timeStamp.Format(time.RFC3339)
+	return e
+}
+
+// SetTimestampNow sets the embed timestamp to the current time in UTC
+func (e *MessageEmbed) SetTimestampNow() *MessageEmbed {
+	e.Timestamp = time.Now().UTC().Format(time.RFC3339)
 	return e
 }

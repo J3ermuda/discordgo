@@ -51,7 +51,7 @@ func TestGuild_CreateDeleteRole(t *testing.T) {
 	editData := &RoleEdit{
 		Name:        "OwO a testing role",
 		Hoist:       false,
-		Color:       0xff00ff,
+		Color:       ColorGreen,
 		Permissions: r.Permissions,
 		Mentionable: true,
 	}
@@ -75,10 +75,16 @@ func TestRole_Move(t *testing.T) {
 		t.Fatalf("Role failed to create in Guild; %s", err)
 	}
 
+	c := ColorGreen
+	err = c.SetHex("#ffff00")
+	if err != nil {
+		t.Fatalf("failed at parsing hex code; %s", err)
+	}
+
 	editData := &RoleEdit{
 		Name:        "OwO a moving role",
 		Hoist:       false,
-		Color:       0x6600ff,
+		Color:       c,
 		Permissions: r.Permissions,
 		Mentionable: false,
 	}
