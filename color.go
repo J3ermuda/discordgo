@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// These Colors are constants to be used for easily using base colors
 const (
 	ColorGreen     = Color(0x2ecc71)
 	ColorBlue      = Color(0x3498db)

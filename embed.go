@@ -200,11 +200,13 @@ func (e *MessageEmbed) SetThumbnail(url string) *MessageEmbed {
 	return e
 }
 
+// SetTimestamp sets the embed timestamp to a custom value
 func (e *MessageEmbed) SetTimestamp(timeStamp time.Time) *MessageEmbed {
 	e.Timestamp = timeStamp.Format(time.RFC3339)
 	return e
 }
 
+// SetTimestampNow sets the embed timestamp to the current time in UTC
 func (e *MessageEmbed) SetTimestampNow() *MessageEmbed {
 	e.Timestamp = time.Now().UTC().Format(time.RFC3339)
 	return e
