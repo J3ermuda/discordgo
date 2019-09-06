@@ -125,10 +125,10 @@ func (p *Permissions) Set(perm PermissionOffset, value bool) {
 
 // A PermissionOverwrite holds permission overwrite data for a Channel
 type PermissionOverwrite struct {
-	ID    string       `json:"id"`
-	Type  string       `json:"type"`
-	Deny  *Permissions `json:"deny"`
-	Allow *Permissions `json:"allow"`
+	ID    string      `json:"id"`
+	Type  string      `json:"type"`
+	Deny  Permissions `json:"deny"`
+	Allow Permissions `json:"allow"`
 }
 
 // Has returns the value that has been set for a given permission in this overwrite

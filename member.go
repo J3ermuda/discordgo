@@ -121,7 +121,7 @@ func (m *Member) GetRoles() (roles []*Role, err error) {
 }
 
 // GetColor returns the hex code of the members color as displayed in the server
-func (m *Member) GetColor() (color int, err error) {
+func (m *Member) GetColor() (color Color, err error) {
 	roles, err := m.GetRoles()
 	if err != nil {
 		return

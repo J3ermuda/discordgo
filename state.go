@@ -1050,7 +1050,7 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 // 0 is returned in cases of error, which is the color of @everyone.
 // userID    : The ID of the user to calculate the color for.
 // channelID   : The ID of the channel to calculate the color for.
-func (s *State) UserColor(userID, channelID string) int {
+func (s *State) UserColor(userID, channelID string) Color {
 	if s == nil {
 		return 0
 	}
