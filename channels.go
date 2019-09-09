@@ -3,6 +3,7 @@ package discordgo
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -103,6 +104,32 @@ func (c Channel) GetID() string {
 // CreatedAt returns the channels creation time in UTC
 func (c Channel) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(c.ID)
+}
+
+// GetParent returns the category that the channel belongs to,
+// or returns an error if it doesn't
+func (c *Channel) GetParent() (*Channel, error) {
+	if c.ParentID == "" {
+		return nil, ErrStateNotFound
+	}
+	return c.Session.State.Channel(c.ParentID)
+}
+
+// PermissionSynced returns true if the channel permissions are synced with their category
+func (c *Channel) PermissionsSynced() (bool, error) {
+	if c.ParentID == "" {
+		return false, nil
+	}
+
+	p, err := c.GetParent()
+	if err != nil {
+		if err == ErrStateNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return reflect.DeepEqual(p.PermissionOverwrites, c.PermissionOverwrites), nil
 }
 
 // Guild retrieves the guild belonging to the channel
@@ -377,12 +404,57 @@ func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwri
 		permType = "role"
 	default:
 		err = errors.New("target parameter must be either a user, member or a role")
+		return
 	}
 
 	if overwrite != nil {
 		return c.Session.ChannelPermissionSet(c.ID, target.GetID(), permType, overwrite.Allow, overwrite.Deny)
 	}
 	return c.Session.ChannelPermissionDelete(c.ID, target.GetID())
+}
+
+// ChangedRoles returns all roles where the default perms were overwritten
+func (c *Channel) ChangedRoles() (roles []*Role, err error) {
+	g, err := c.Guild()
+	if err != nil {
+		return
+	}
+
+	for _, o := range c.PermissionOverwrites {
+		if o.Type == "member" {
+			continue
+		}
+
+		r, err := g.GetRole(o.ID)
+		if err != nil {
+			return
+		}
+		roles = append(roles, r)
+	}
+	return
+}
+
+// OverwritesFor returns the overwrites for the given user or role in the channel
+func (c *Channel) OverwritesFor(target IDGettable) (overwrite *PermissionOverwrite, err error) {
+	var permType string
+	switch target.(type) {
+	case User:
+		permType = "member"
+	case Member:
+		permType = "member"
+	case Role:
+		permType = "role"
+	default:
+		err = errors.New("target parameter must be either a user, member or a role")
+		return
+	}
+
+	for _, o := range c.PermissionOverwrites {
+		if o.Type == permType && o.ID == target.GetID() {
+			return o, nil
+		}
+	}
+	return nil, ErrStateNotFound
 }
 
 // Delete deletes the channel

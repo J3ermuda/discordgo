@@ -374,6 +374,28 @@ type GuildEmbed struct {
 	ChannelID string `json:"channel_id"`
 }
 
+type AuditLogEntry struct {
+	TargetID string `json:"target_id"`
+	Changes  []struct {
+		NewValue interface{} `json:"new_value"`
+		OldValue interface{} `json:"old_value"`
+		Key      string      `json:"key"`
+	} `json:"changes,omitempty"`
+	UserID     string `json:"user_id"`
+	ID         string `json:"id"`
+	ActionType int    `json:"action_type"`
+	Options    struct {
+		DeleteMembersDay string `json:"delete_member_days"`
+		MembersRemoved   string `json:"members_removed"`
+		ChannelID        string `json:"channel_id"`
+		Count            string `json:"count"`
+		ID               string `json:"id"`
+		Type             string `json:"type"`
+		RoleName         string `json:"role_name"`
+	} `json:"options,omitempty"`
+	Reason string `json:"reason"`
+}
+
 // A GuildAuditLog stores data for a guild audit log.
 type GuildAuditLog struct {
 	Webhooks []struct {
@@ -390,27 +412,7 @@ type GuildAuditLog struct {
 		ID            string `json:"id"`
 		Avatar        string `json:"avatar"`
 	} `json:"users,omitempty"`
-	AuditLogEntries []struct {
-		TargetID string `json:"target_id"`
-		Changes  []struct {
-			NewValue interface{} `json:"new_value"`
-			OldValue interface{} `json:"old_value"`
-			Key      string      `json:"key"`
-		} `json:"changes,omitempty"`
-		UserID     string `json:"user_id"`
-		ID         string `json:"id"`
-		ActionType int    `json:"action_type"`
-		Options    struct {
-			DeleteMembersDay string `json:"delete_member_days"`
-			MembersRemoved   string `json:"members_removed"`
-			ChannelID        string `json:"channel_id"`
-			Count            string `json:"count"`
-			ID               string `json:"id"`
-			Type             string `json:"type"`
-			RoleName         string `json:"role_name"`
-		} `json:"options,omitempty"`
-		Reason string `json:"reason"`
-	} `json:"audit_log_entries"`
+	AuditLogEntries []*AuditLogEntry `json:"audit_log_entries"`
 }
 
 // Block contains Discord Audit Log Action Types
