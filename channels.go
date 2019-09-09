@@ -115,7 +115,7 @@ func (c *Channel) GetParent() (*Channel, error) {
 	return c.Session.State.Channel(c.ParentID)
 }
 
-// PermissionSynced returns true if the channel permissions are synced with their category
+// PermissionsSynced returns true if the channel permissions are synced with their category
 func (c *Channel) PermissionsSynced() (bool, error) {
 	if c.ParentID == "" {
 		return false, nil

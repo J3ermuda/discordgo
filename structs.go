@@ -374,6 +374,7 @@ type GuildEmbed struct {
 	ChannelID string `json:"channel_id"`
 }
 
+// AuditLogEntry describes an entry in the guild audit log
 type AuditLogEntry struct {
 	TargetID string `json:"target_id"`
 	Changes  []struct {
