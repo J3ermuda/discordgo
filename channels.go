@@ -420,12 +420,13 @@ func (c *Channel) ChangedRoles() (roles []*Role, err error) {
 		return
 	}
 
+	var r *Role
 	for _, o := range c.PermissionOverwrites {
 		if o.Type == "member" {
 			continue
 		}
 
-		r, err := g.GetRole(o.ID)
+		r, err = g.GetRole(o.ID)
 		if err != nil {
 			return
 		}

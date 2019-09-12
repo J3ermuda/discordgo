@@ -1142,6 +1142,13 @@ func (s *Session) GuildAuditLog(guildID, userID, beforeID string, actionType, li
 	}
 
 	err = unmarshal(body, &st)
+	if err != nil {
+		return
+	}
+	for _, e := range st.AuditLogEntries {
+		e.Session = s
+		e.GuildID = guildID
+	}
 	return
 }
 
