@@ -71,6 +71,11 @@ type RoleMove struct {
 	Position int `json:"position"`
 }
 
+// String returns the name of the role for easy formatting
+func (r Role) String() string {
+	return r.Name
+}
+
 // GetID returns the ID of the Role
 func (r Role) GetID() string {
 	return r.ID
@@ -84,6 +89,16 @@ func (r Role) CreatedAt() (creation time.Time, err error) {
 // Mention returns a string which mentions the role
 func (r Role) Mention() string {
 	return fmt.Sprintf("<@&%s>", r.ID)
+}
+
+// LowerThan returns true if the role is lower in the role hierarchy than the other
+func (r *Role) LowerThan(other *Role) bool {
+	return r.Position < other.Position
+}
+
+// HigherThan returns true if the role is higher in the role hierarchy than the other
+func (r *Role) HigherThan(other *Role) bool {
+	return r.Position > other.Position
 }
 
 // IsDefault checks if the Role is the default (@everyone) role

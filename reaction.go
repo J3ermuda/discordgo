@@ -4,11 +4,16 @@ package discordgo
 type MessageReaction struct {
 	UserID    string `json:"user_id"`
 	MessageID string `json:"message_id"`
-	Emoji     Emoji  `json:"emoji"`
+	Emoji     *Emoji `json:"emoji"`
 	ChannelID string `json:"channel_id"`
 	GuildID   string `json:"guild_id,omitempty"`
 
 	Session *Session `json:"-"`
+}
+
+// String renders the string needed to display the emoji used in the reaction correctly in discord
+func (r MessageReaction) String() string {
+	return r.Emoji.String()
 }
 
 // Remove removes the reaction from the message it was added to

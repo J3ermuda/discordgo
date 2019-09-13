@@ -79,7 +79,7 @@ func (e *Emoji) IsCustom() bool {
 }
 
 // String renders the string needed to display the emoji correctly in discord
-func (e *Emoji) String() string {
+func (e Emoji) String() string {
 	if !e.IsCustom() {
 		return e.Name
 	} else if e.Animated {
