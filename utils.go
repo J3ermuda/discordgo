@@ -48,3 +48,19 @@ func SnowflakeToTime(snowflake string) (returnTime time.Time, err error) {
 	returnTime = time.Unix(0, timestamp).UTC()
 	return
 }
+
+// IDWrapper is a struct used to make a bare ID string into an IDGettable object,
+// this can then be used to pass it to a function that accepts any IDGettable object
+type IDWrapper struct {
+	ID string
+}
+
+// GetID returns the ID inside the IDWrapper
+func (i IDWrapper) GetID() string {
+	return i.ID
+}
+
+// CreatedAt returns the creation time in UTC of the object that the snowflake ID represents
+func (i IDWrapper) CreatedAt() (creation time.Time, err error) {
+	return SnowflakeToTime(i.ID)
+}
