@@ -91,6 +91,11 @@ type Channel struct {
 	Session *Session `json:"-"`
 }
 
+// String returns the name of the channel for easy formatting
+func (c Channel) String() string {
+	return c.Name
+}
+
 // Mention returns a string which mentions the channel
 func (c Channel) Mention() string {
 	return fmt.Sprintf("<#%s>", c.ID)

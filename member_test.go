@@ -43,6 +43,9 @@ func TestMember_GetTopRole(t *testing.T) {
 	if c.ID == envGuild {
 		t.Fatalf("Got lowest role instead of top role")
 	}
+	if c.ID != envAdminRole {
+		t.Fatalf("got %s instead of top role", c)
+	}
 }
 
 /*

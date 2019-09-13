@@ -159,13 +159,18 @@ type GuildLimit struct {
 	FileSize int
 }
 
+// String returns the guild's name for easy formatting
+func (g Guild) String() string {
+	return g.Name
+}
+
 // GetID returns the guilds ID
-func (g *Guild) GetID() string {
+func (g Guild) GetID() string {
 	return g.ID
 }
 
 // CreatedAt returns the guilds creation time in UTC
-func (g *Guild) CreatedAt() (creation time.Time, err error) {
+func (g Guild) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(g.ID)
 }
 
