@@ -240,6 +240,7 @@ func TestHandlerSessionInserter(t *testing.T) {
 
 	select {
 	case <-time.After(20000 * time.Millisecond):
+		t.Fatal("the handlers weren't called")
 	case <-done:
 	}
 	r()
