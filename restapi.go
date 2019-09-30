@@ -642,7 +642,7 @@ func (s *Session) GuildMemberEdit(guildID, userID, reason string, roles []string
 	return
 }
 
-// GuildMemberMove moves a guild member from one voice channel to another/none
+// GuildMemberMove moves a guild member from one voice channel to another
 //  guildID   : The ID of a Guild.
 //  userID    : The ID of a User.
 //  channelID : The ID of a channel to move user to
@@ -661,7 +661,7 @@ func (s *Session) GuildMemberMove(guildID, userID, channelID, reason string) (er
 	return
 }
 
-// GuildMemberMove moves a guild member from one voice channel to another/none
+// GuildMemberVoiceDisconnect disconnects a member from a voice channel
 //  guildID   : The ID of a Guild.
 //  userID    : The ID of a User.
 //  reason    : The reason for the member move

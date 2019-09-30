@@ -223,7 +223,7 @@ func (m *Member) RemoveRole(role *Role, reason string) (err error) {
 	return m.User.Session.GuildMemberRoleRemove(m.GuildID, m.User.ID, role.ID, reason)
 }
 
-// RemoveRole removes multiple roles from the member
+// RemoveRoles removes multiple roles from the member
 // roles     : roles to remove
 // reason   : the reason for the role removes
 func (m *Member) RemoveRoles(roles []*Role, reason string) (err error) {
