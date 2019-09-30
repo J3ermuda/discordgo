@@ -33,9 +33,9 @@ type Member struct {
 	PremiumSince Timestamp `json:"premium_since"`
 }
 
-// String returns a unique identifier of the form username#discriminator
+// String returns a unique identifier of the form displayName#discriminator
 func (m Member) String() string {
-	return m.User.String()
+	return m.GetDisplayName() + "#" + m.User.Discriminator
 }
 
 // GetID returns the members ID
@@ -54,6 +54,12 @@ func (m Member) Mention() string {
 		return "<@!" + m.User.ID + ">"
 	}
 	return m.User.Mention()
+}
+
+// IsOwner checks if the member is the owner of the guild they are in
+func (m *Member) IsOwner() bool {
+	g, _ := m.GetGuild()
+	return g.OwnerID == m.GetID()
 }
 
 // IsMentionedIn checks if the member is mentioned in the given message
@@ -159,7 +165,7 @@ func (m *Member) Kick(reason string) (err error) {
 }
 
 // Ban bans the member from their guild
-// reason     : reason for the ban as it will be displayed in the auditlog
+// reason     : reason for the ban as it will be displayed in the audit log
 // days       : days of messages to delete
 func (m *Member) Ban(reason string, days int) (err error) {
 	g, err := m.GetGuild()
