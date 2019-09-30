@@ -177,13 +177,14 @@ func (m *Member) Ban(reason string, days int) (err error) {
 }
 
 // EditRoles replaces all roles of the user with the provided slice of roles
-// roles     : a slice of Role objects
-func (m *Member) EditRoles(roles Roles) (err error) {
-	var roleIDs []string
+// roles   : a slice of Role objects
+// reason  : the reason for the change in roles
+func (m *Member) EditRoles(roles Roles, reason string) (err error) {
+	roleIDs := make([]string, 0, len(roles))
 	for _, r := range roles {
 		roleIDs = append(roleIDs, r.ID)
 	}
-	return m.User.Session.GuildMemberEdit(m.GuildID, m.User.ID, roleIDs)
+	return m.User.Session.GuildMemberEdit(m.GuildID, m.User.ID, reason, roleIDs)
 }
 
 // EditNickname sets the nickname of the member
@@ -194,21 +195,67 @@ func (m *Member) EditNickname(nick string) (err error) {
 
 // MoveTo moves the member to a voice channel
 // channel   : voice channel to move the user to
-func (m *Member) MoveTo(channel *Channel) (err error) {
+// reason    : the reason for the move
+func (m *Member) MoveTo(channel *Channel, reason string) (err error) {
 	if channel.Type != ChannelTypeGuildVoice {
 		return ErrNotAVoiceChannel
 	}
-	return m.User.Session.GuildMemberMove(m.GuildID, m.User.ID, channel.ID)
+	return m.User.Session.GuildMemberMove(m.GuildID, m.User.ID, channel.ID, reason)
+}
+
+// DisconnectFromVoice disconnects the member from whatever voice channel they are in
+// reason    : the reason for the disconnect
+func (m *Member) DisconnectFromVoice(reason string) (err error) {
+	return m.User.Session.GuildMemberVoiceDisconnect(m.GuildID, m.User.ID, reason)
 }
 
 // AddRole adds a role to the member
 // role     : role to add
-func (m *Member) AddRole(role *Role) (err error) {
-	return m.User.Session.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
+// reason   : the reason for the role add
+func (m *Member) AddRole(role *Role, reason string) (err error) {
+	return m.User.Session.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID, reason)
 }
 
 // RemoveRole removes a role from the member
 // role     : role to remove
-func (m *Member) RemoveRole(role *Role) (err error) {
-	return m.User.Session.GuildMemberRoleRemove(m.GuildID, m.User.ID, role.ID)
+// reason   : the reason for the role remove
+func (m *Member) RemoveRole(role *Role, reason string) (err error) {
+	return m.User.Session.GuildMemberRoleRemove(m.GuildID, m.User.ID, role.ID, reason)
+}
+
+// RemoveRole removes multiple roles from the member
+// roles     : roles to remove
+// reason   : the reason for the role removes
+func (m *Member) RemoveRoles(roles []*Role, reason string) (err error) {
+	keepRoles := m.Roles[:0]
+	for _, role := range m.Roles {
+		var remove bool
+		for _, toRemove := range roles {
+			if toRemove.ID == role && !toRemove.IsDefault() {
+				remove = true
+				break
+			}
+		}
+		if !remove {
+			keepRoles = append(keepRoles, role)
+		}
+	}
+
+	return m.User.Session.GuildMemberEdit(m.GuildID, m.GetID(), reason, keepRoles)
+}
+
+// AddRoles adds multiple roles to the member
+// roles     : roles to add
+// reason   : the reason for the role adds
+func (m *Member) AddRoles(roles []*Role, reason string) (err error) {
+	ids := make([]string, 0, len(roles)+len(m.Roles))
+	for _, role := range roles {
+		ids = append(ids, role.ID)
+	}
+	for _, role := range m.Roles {
+		if !Contains(ids, role) {
+			ids = append(ids, role)
+		}
+	}
+	return m.User.Session.GuildMemberEdit(m.GuildID, m.GetID(), reason, ids)
 }

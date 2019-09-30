@@ -457,6 +457,24 @@ func (s *Session) GuildBans(guildID string) (st []*GuildBan, err error) {
 	return
 }
 
+// GuildBan returns the GuildBan structure of the banned user in the given guild
+// guildID   : The ID of a Guild.
+// userID    : The ID of a User
+func (s *Session) GuildBan(guildID string, userID string) (st *GuildBan, err error) {
+	body, err := s.RequestWithBucketID("GET", EndpointGuildBan(guildID, userID), nil, EndpointGuildBan(guildID, ""))
+	if err != nil {
+		return
+	}
+
+	err = unmarshal(body, &st)
+	if err != nil {
+		return
+	}
+
+	st.User.Session = s
+	return
+}
+
 // GuildBanCreate bans the given user from the given guild.
 // guildID   : The ID of a Guild.
 // userID    : The ID of a User
@@ -465,7 +483,7 @@ func (s *Session) GuildBanCreate(guildID, userID string, days int) (err error) {
 	return s.GuildBanCreateWithReason(guildID, userID, "", days)
 }
 
-// GuildBanCreateWithReason bans the given user from the given guild also providing a reaso.
+// GuildBanCreateWithReason bans the given user from the given guild also providing a reason.
 // guildID   : The ID of a Guild.
 // userID    : The ID of a User
 // reason    : The reason for this ban
@@ -586,7 +604,6 @@ func (s *Session) GuildMemberAdd(accessToken, guildID, userID, nick string, role
 // guildID   : The ID of a Guild.
 // userID    : The ID of a User
 func (s *Session) GuildMemberDelete(guildID, userID string) (err error) {
-
 	return s.GuildMemberDeleteWithReason(guildID, userID, "")
 }
 
@@ -608,38 +625,57 @@ func (s *Session) GuildMemberDeleteWithReason(guildID, userID, reason string) (e
 // GuildMemberEdit edits the roles of a member.
 // guildID  : The ID of a Guild.
 // userID   : The ID of a User.
+// reason   : The reason for the member role edit.
 // roles    : A list of role ID's to set on the member.
-func (s *Session) GuildMemberEdit(guildID, userID string, roles []string) (err error) {
+func (s *Session) GuildMemberEdit(guildID, userID, reason string, roles []string) (err error) {
+	uri := EndpointGuildMember(guildID, userID)
+
+	if reason != "" {
+		uri += "?reason=" + url.QueryEscape(reason)
+	}
 
 	data := struct {
 		Roles []string `json:"roles"`
 	}{roles}
 
-	_, err = s.RequestWithBucketID("PATCH", EndpointGuildMember(guildID, userID), data, EndpointGuildMember(guildID, ""))
-	if err != nil {
-		return
-	}
-
+	_, err = s.RequestWithBucketID("PATCH", uri, data, EndpointGuildMember(guildID, ""))
 	return
 }
 
 // GuildMemberMove moves a guild member from one voice channel to another/none
 //  guildID   : The ID of a Guild.
 //  userID    : The ID of a User.
-//  channelID : The ID of a channel to move user to, or null?
-// NOTE : I am not entirely set on the name of this function and it may change
-// prior to the final 1.0.0 release of Discordgo
-func (s *Session) GuildMemberMove(guildID, userID, channelID string) (err error) {
+//  channelID : The ID of a channel to move user to
+//  reason    : The reason for the member move
+func (s *Session) GuildMemberMove(guildID, userID, channelID, reason string) (err error) {
+	uri := EndpointGuildMember(guildID, userID)
+	if reason != "" {
+		uri += "?reason=" + url.QueryEscape(reason)
+	}
 
 	data := struct {
 		ChannelID string `json:"channel_id"`
 	}{channelID}
 
-	_, err = s.RequestWithBucketID("PATCH", EndpointGuildMember(guildID, userID), data, EndpointGuildMember(guildID, ""))
-	if err != nil {
-		return
+	_, err = s.RequestWithBucketID("PATCH", uri, data, EndpointGuildMember(guildID, ""))
+	return
+}
+
+// GuildMemberMove moves a guild member from one voice channel to another/none
+//  guildID   : The ID of a Guild.
+//  userID    : The ID of a User.
+//  reason    : The reason for the member move
+func (s *Session) GuildMemberVoiceDisconnect(guildID, userID, reason string) (err error) {
+	uri := EndpointGuildMember(guildID, userID)
+	if reason != "" {
+		uri += "?reason=" + url.QueryEscape(reason)
 	}
 
+	data := struct {
+		ChannelID *string `json:"channel_id"`
+	}{nil}
+
+	_, err = s.RequestWithBucketID("PATCH", uri, data, EndpointGuildMember(guildID, ""))
 	return
 }
 
@@ -665,9 +701,14 @@ func (s *Session) GuildMemberNickname(guildID, userID, nickname string) (err err
 //  guildID   : The ID of a Guild.
 //  userID    : The ID of a User.
 //  roleID 	  : The ID of a Role to be assigned to the user.
-func (s *Session) GuildMemberRoleAdd(guildID, userID, roleID string) (err error) {
+//  reason    : The reason for the role add.
+func (s *Session) GuildMemberRoleAdd(guildID, userID, roleID, reason string) (err error) {
+	uri := EndpointGuildMemberRole(guildID, userID, roleID)
+	if reason != "" {
+		uri += "?reason=" + url.QueryEscape(reason)
+	}
 
-	_, err = s.RequestWithBucketID("PUT", EndpointGuildMemberRole(guildID, userID, roleID), nil, EndpointGuildMemberRole(guildID, "", ""))
+	_, err = s.RequestWithBucketID("PUT", uri, nil, EndpointGuildMemberRole(guildID, "", ""))
 
 	return
 }
@@ -676,9 +717,15 @@ func (s *Session) GuildMemberRoleAdd(guildID, userID, roleID string) (err error)
 //  guildID   : The ID of a Guild.
 //  userID    : The ID of a User.
 //  roleID 	  : The ID of a Role to be removed from the user.
-func (s *Session) GuildMemberRoleRemove(guildID, userID, roleID string) (err error) {
+//  reason    : The reason for the role remove.
+func (s *Session) GuildMemberRoleRemove(guildID, userID, roleID, reason string) (err error) {
+	uri := EndpointGuildMemberRole(guildID, userID, roleID)
 
-	_, err = s.RequestWithBucketID("DELETE", EndpointGuildMemberRole(guildID, userID, roleID), nil, EndpointGuildMemberRole(guildID, "", ""))
+	if reason != "" {
+		uri += "?reason=" + url.QueryEscape(reason)
+	}
+
+	_, err = s.RequestWithBucketID("DELETE", uri, nil, EndpointGuildMemberRole(guildID, "", ""))
 
 	return
 }

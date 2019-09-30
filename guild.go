@@ -301,10 +301,16 @@ func (g *Guild) UnBan(user *User) error {
 }
 
 // Kick kicks the given user from the guild.
-// userID    : The ID of a User
+// user      : The User to kick
 // reason    : The reason for the kick
 func (g *Guild) Kick(user *User, reason string) error {
 	return g.Session.GuildMemberDeleteWithReason(g.ID, user.ID, reason)
+}
+
+// GetBan returns the ban object of the given user
+// user      : The User to get the ban object for
+func (g *Guild) GetBan(user *User) (ban *GuildBan, err error) {
+	return g.Session.GuildBan(g.ID, user.ID)
 }
 
 // GetBans returns an array of GuildBan structures for all bans of the guild
