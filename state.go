@@ -957,6 +957,7 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		if t.Message.Author != nil {
 			t.Message.Author.Session = se
 			if t.Message.Member != nil {
+				t.Message.Member.GuildID = t.Message.GuildID
 				t.Message.Member.User = t.Message.Author
 			}
 		}
@@ -972,6 +973,7 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		if t.Message.Author != nil {
 			t.Message.Author.Session = se
 			if t.Message.Member != nil {
+				t.Message.Member.GuildID = t.Message.GuildID
 				t.Message.Member.User = t.Message.Author
 			}
 		}

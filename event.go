@@ -224,6 +224,7 @@ func (s *Session) setSession(g *Guild) {
 
 	for _, m := range g.Members {
 		m.User.Session = s
+		m.GuildID = g.ID
 	}
 
 	for _, r := range g.Roles {
