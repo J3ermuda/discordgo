@@ -58,7 +58,11 @@ func (m Member) Mention() string {
 
 // IsOwner checks if the member is the owner of the guild they are in
 func (m *Member) IsOwner() bool {
-	g, _ := m.GetGuild()
+	g, err := m.GetGuild()
+	if err != nil {
+		return false
+	}
+
 	return g.OwnerID == m.GetID()
 }
 
