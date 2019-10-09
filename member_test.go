@@ -68,7 +68,7 @@ func TestMember_AddRole(t *testing.T) {
 		t.Skip("Skipping, DG_ROLE has not been set or is not in DG_GUILD")
 	}
 
-	err = m.AddRole(r)
+	err = m.AddRole(r, "AddRole testing")
 	if err != nil {
 		t.Fatalf("Adding role to member failed, because: %s", err)
 	}
@@ -82,7 +82,7 @@ func TestMember_RemoveRole(t *testing.T) {
 		t.Skip("Skipping, DG_ROLE has not been set or is not in DG_GUILD")
 	}
 
-	err = m.RemoveRole(r)
+	err = m.RemoveRole(r, "RemoveRole testing")
 	if err != nil {
 		t.Fatalf("Removing role from member failed, because: %s", err)
 	}

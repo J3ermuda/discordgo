@@ -29,11 +29,6 @@ var ErrMFA = errors.New("account has 2FA enabled")
 // New creates a new Discord session and will automate some startup
 // tasks if given enough information to do so.  Currently you can pass zero
 // arguments and it will return an empty Discord session.
-// There are 3 ways to call New:
-//     With a single auth token - All requests will use the token blindly,
-//         no verification of the token will be done and requests may fail.
-//         IF THE TOKEN IS FOR A BOT, IT MUST BE PREFIXED WITH `BOT `
-//         eg: `"Bot <token>"`
 func New(args ...interface{}) (s *Session, err error) {
 
 	// Create an empty Session interface.
@@ -62,9 +57,7 @@ func New(args ...interface{}) (s *Session, err error) {
 		switch v := arg.(type) {
 
 		case string:
-			// First string must be either auth token or username.
-			// Second string must be a password.
-			// Only 2 input strings are supported.
+			// First string must be the auth token.
 
 			if s.Token == "" {
 				s.Token = "Bot " + v
@@ -73,16 +66,15 @@ func New(args ...interface{}) (s *Session, err error) {
 				return
 			}
 
-			//		case Config:
-			// TODO: Parse configuration struct
-
+		//	case Config:
+		// TODO: Parse configuration struct
 		default:
 			err = fmt.Errorf("unsupported parameter type provided")
 			return
 		}
 	}
+
 	// The Session is now able to have RestAPI methods called on it.
 	// It is recommended that you now call Open() so that events will trigger.
-
 	return
 }

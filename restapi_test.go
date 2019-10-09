@@ -31,7 +31,7 @@ func TestUserAvatar(t *testing.T) {
 		t.Skip("Cannot TestUserAvatar, dg not set.")
 	}
 
-	u, err := dg.User("@me")
+	u, err := dg.FetchUser("@me")
 	if err != nil {
 		t.Error("error fetching @me user,", err)
 	}

@@ -64,3 +64,26 @@ func (i IDWrapper) GetID() string {
 func (i IDWrapper) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(i.ID)
 }
+
+type TimeSorter []TimeSortable
+
+func (t TimeSorter) Len() int {
+	return len(t)
+}
+
+func (t TimeSorter) Less(i, j int) bool {
+	iCreation, _ := t[i].CreatedAt()
+	jCreation, _ := t[j].CreatedAt()
+	return iCreation.After(jCreation)
+}
+
+func (t TimeSorter) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+
+func ReverseOnCreationTime(toSort []TimeSortable) []TimeSortable {
+	toReverse := append(TimeSorter{}, toSort...)
+	reversed := sort.Reverse(toReverse)
+	sort.Sort(reversed)
+	return reversed.(TimeSorter)
+}

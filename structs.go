@@ -184,7 +184,7 @@ func (i *Invite) build(s *Session) {
 		i.Guild.Session = s
 	}
 
-	user, UErr := s.User(i.Inviter.ID)
+	user, UErr := s.FetchUser(i.Inviter.ID)
 	if UErr == nil {
 		i.Inviter = user
 	} else {

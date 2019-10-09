@@ -188,3 +188,8 @@ func (u User) FetchMessage(id string) (message *Message, err error) {
 func (u User) GetHistory(limit int, beforeID, afterID, aroundID string) (st []*Message, err error) {
 	return u.Session.ChannelMessages(u.DMChannel.ID, limit, beforeID, afterID, aroundID)
 }
+
+// GetHistoryIterator returns a bare HistoryIterator for this user.
+func (u User) GetHistoryIterator() *HistoryIterator {
+	return NewHistoryIterator(u)
+}
