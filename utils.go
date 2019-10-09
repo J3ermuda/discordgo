@@ -65,6 +65,7 @@ func (i IDWrapper) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(i.ID)
 }
 
+// TimeSorter is a struct for allowing sorting on objects with a CreatedAt method
 type TimeSorter []TimeSortable
 
 func (t TimeSorter) Len() int {
@@ -79,11 +80,4 @@ func (t TimeSorter) Less(i, j int) bool {
 
 func (t TimeSorter) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
-}
-
-func ReverseOnCreationTime(toSort []TimeSortable) []TimeSortable {
-	toReverse := append(TimeSorter{}, toSort...)
-	reversed := sort.Reverse(toReverse)
-	sort.Sort(reversed)
-	return reversed.(TimeSorter)
 }
