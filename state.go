@@ -420,6 +420,10 @@ func (s *State) GetUser(userID string) (*User, error) {
 		return nil, ErrNilState
 	}
 
+	if userID == "@me" {
+		return s.User, nil
+	}
+
 	s.RLock()
 	defer s.RUnlock()
 

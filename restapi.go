@@ -187,9 +187,20 @@ func unmarshal(data []byte, v interface{}) error {
 // Functions specific to Discord Users
 // ------------------------------------------------------------------------------------------------
 
-// User returns the user details of the given userID
+// User returns the user details of the given userID,
+// will first try the state cache before querying the discord api
 // userID    : A user ID or "@me" which is a shortcut of current user ID
 func (s *Session) User(userID string) (st *User, err error) {
+	st, err = s.State.GetUser(userID)
+	if err != nil {
+		st, err = s.FetchUser(userID)
+	}
+	return
+}
+
+// FetchUser returns the user details of the given userID from the discord api
+// userID    : A user ID or "@me" which is a shortcut of current user ID
+func (s *Session) FetchUser(userID string) (st *User, err error) {
 
 	body, err := s.RequestWithBucketID("GET", EndpointUser(userID), nil, EndpointUsers)
 	if err != nil {
@@ -556,9 +567,21 @@ func (s *Session) GuildMembers(guildID string, after string, limit int) (st []*M
 }
 
 // GuildMember returns a member of a guild.
+// will first try the state cache before querying the discord api
 //  guildID   : The ID of a Guild.
 //  userID    : The ID of a User
 func (s *Session) GuildMember(guildID, userID string) (st *Member, err error) {
+	st, err = s.State.Member(guildID, userID)
+	if err != nil {
+		st, err = s.FetchGuildMember(guildID, userID)
+	}
+	return
+}
+
+// FetchGuildMember returns a member of a guild from the discord api.
+//  guildID   : The ID of a Guild.
+//  userID    : The ID of a User
+func (s *Session) FetchGuildMember(guildID, userID string) (st *Member, err error) {
 
 	body, err := s.RequestWithBucketID("GET", EndpointGuildMember(guildID, userID), nil, EndpointGuildMember(guildID, ""))
 	if err != nil {
@@ -1280,8 +1303,19 @@ func (s *Session) GuildEmojiDelete(guildID, emojiID string) (err error) {
 // ------------------------------------------------------------------------------------------------
 
 // Channel returns a Channel structure of a specific Channel.
+// will first try the state cache before querying the discord api
 // channelID  : The ID of the Channel you want returned.
 func (s *Session) Channel(channelID string) (st *Channel, err error) {
+	st, err = s.State.Channel(channelID)
+	if err != nil {
+		st, err = s.FetchChannel(channelID)
+	}
+	return
+}
+
+// FetchChannel returns a Channel structure of a specific Channel using the discord api.
+// channelID  : The ID of the Channel you want returned.
+func (s *Session) FetchChannel(channelID string) (st *Channel, err error) {
 	body, err := s.RequestWithBucketID("GET", EndpointChannel(channelID), nil, EndpointChannel(channelID))
 	if err != nil {
 		return

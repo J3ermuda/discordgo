@@ -8,21 +8,21 @@ import (
 )
 
 // ErrNotATextChannel gets returned when a method gets called on a channel
-// that does not support sending messages to them
+// that does not support sending messages to them.
 var ErrNotATextChannel = errors.New("not a text or dm channel")
 
 // ErrNotAVoiceChannel gets thrown when a method gets called on a channel
-// that is not a Guild Voice channel but does need to be for the method to work
+// that is not a Guild Voice channel but does need to be for the method to work.
 var ErrNotAVoiceChannel = errors.New("not a voice channel")
 
 // ErrNotAGuildChannel gets thrown when a method gets called on a channel
-// that is not inside of a Guild but does need to be for the method to work
+// that is not inside of a Guild but does need to be for the method to work.
 var ErrNotAGuildChannel = errors.New("not a channel in a guild")
 
-// ChannelType is the type of a Channel
+// ChannelType is the type of a Channel.
 type ChannelType int
 
-// Block contains known ChannelType values
+// Block contains known ChannelType values.
 const (
 	ChannelTypeGuildText ChannelType = iota
 	ChannelTypeDM
@@ -91,17 +91,17 @@ type Channel struct {
 	Session *Session `json:"-"`
 }
 
-// String returns the name of the channel for easy formatting
+// String returns the name of the channel for easy formatting.
 func (c Channel) String() string {
 	return c.Name
 }
 
-// Mention returns a string which mentions the channel
+// Mention returns a string which mentions the channel.
 func (c Channel) Mention() string {
 	return fmt.Sprintf("<#%s>", c.ID)
 }
 
-// GetID returns the ID of the channel
+// GetID returns the ID of the channel.
 func (c Channel) GetID() string {
 	return c.ID
 }
@@ -112,7 +112,7 @@ func (c Channel) CreatedAt() (creation time.Time, err error) {
 }
 
 // GetParent returns the category that the channel belongs to,
-// or returns an error if it doesn't
+// or returns an error if it doesn't.
 func (c *Channel) GetParent() (*Channel, error) {
 	if c.ParentID == "" {
 		return nil, ErrStateNotFound
@@ -120,7 +120,7 @@ func (c *Channel) GetParent() (*Channel, error) {
 	return c.Session.State.Channel(c.ParentID)
 }
 
-// PermissionsSynced returns true if the channel permissions are synced with their category
+// PermissionsSynced returns true if the channel permissions are synced with their category.
 func (c *Channel) PermissionsSynced() (bool, error) {
 	if c.ParentID == "" {
 		return false, nil
@@ -137,7 +137,7 @@ func (c *Channel) PermissionsSynced() (bool, error) {
 	return reflect.DeepEqual(p.PermissionOverwrites, c.PermissionOverwrites), nil
 }
 
-// Guild retrieves the guild belonging to the channel
+// Guild retrieves the guild belonging to the channel.
 func (c *Channel) Guild() (g *Guild, err error) {
 	if c.GuildID == "" {
 		err = ErrNotAGuildChannel
@@ -160,7 +160,7 @@ type ChannelEdit struct {
 	RateLimitPerUser     int                    `json:"rate_limit_per_user,omitempty"`
 }
 
-// SendMessage sends a message to the channel
+// SendMessage sends a message to the channel.
 // content         : message content to send if provided
 // embed           : embed to attach to the message if provided
 // files           : files to attach to the message if provided
@@ -179,7 +179,7 @@ func (c Channel) SendMessage(content string, embed *MessageEmbed, files []*File)
 	return c.SendMessageComplex(data)
 }
 
-// SendMessageComplex sends a message to the channel
+// SendMessageComplex sends a message to the channel.
 // data          : MessageSend object with the data to send
 func (c Channel) SendMessageComplex(data *MessageSend) (message *Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
@@ -202,7 +202,7 @@ func (c Channel) EditMessage(data *MessageEdit) (edited *Message, err error) {
 	return c.Session.ChannelMessageEditComplex(data)
 }
 
-// FetchMessage fetches a message with the given ID from the channel
+// FetchMessage fetches a message with the given ID from the channel.
 // ID        : ID of the message to fetch
 func (c Channel) FetchMessage(ID string) (message *Message, err error) {
 	if c.Type == ChannelTypeGuildVoice || c.Type == ChannelTypeGuildCategory {
@@ -213,7 +213,7 @@ func (c Channel) FetchMessage(ID string) (message *Message, err error) {
 	return c.Session.ChannelMessage(c.ID, ID)
 }
 
-// GetHistory fetches up to limit messages from the channel
+// GetHistory fetches up to limit messages from the channel.
 // limit     : The number messages that can be returned. (max 100)
 // beforeID  : If provided all messages returned will be before given ID.
 // afterID   : If provided all messages returned will be after given ID.
@@ -227,23 +227,28 @@ func (c Channel) GetHistory(limit int, beforeID, afterID, aroundID string) (st [
 	return c.Session.ChannelMessages(c.ID, limit, beforeID, afterID, aroundID)
 }
 
-// HasPins returns a bool indicating if a channel has pinned messages
+// GetHistoryIterator returns a bare HistoryIterator for this channel.
+func (c Channel) GetHistoryIterator() *HistoryIterator {
+	return NewHistoryIterator(c)
+}
+
+// HasPins returns a bool indicating if a channel has pinned messages.
 func (c *Channel) HasPins() bool {
 	return c.LastPinTimestamp != ""
 }
 
-// FetchPins fetches all pinned messages in the channel from the discord api
+// FetchPins fetches all pinned messages in the channel from the discord api.
 func (c *Channel) FetchPins() ([]*Message, error) {
 	return c.Session.ChannelMessagesPinned(c.ID)
 }
 
-// DeleteMessage deletes a message from the channel
+// DeleteMessage deletes a message from the channel.
 // message        : message to delete
 func (c *Channel) DeleteMessage(message *Message) (err error) {
 	return c.Session.ChannelMessageDelete(c.ID, message.ID)
 }
 
-// DeleteMessageByID deletes a message with the given ID from the channel
+// DeleteMessageByID deletes a message with the given ID from the channel.
 // ID        : ID of the message to delete
 func (c *Channel) DeleteMessageByID(ID string) (err error) {
 	return c.Session.ChannelMessageDelete(c.ID, ID)
@@ -397,7 +402,7 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 	return
 }
 
-// SetPermissions sets or deletes a permission overwrite on the channel
+// SetPermissions sets or deletes a permission overwrite on the channel.
 func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwrite) (err error) {
 	var permType string
 	switch target.(type) {
@@ -418,7 +423,7 @@ func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwri
 	return c.Session.ChannelPermissionDelete(c.ID, target.GetID())
 }
 
-// ChangedRoles returns all roles where the default perms were overwritten
+// ChangedRoles returns all roles where the default perms were overwritten.
 func (c *Channel) ChangedRoles() (roles []*Role, err error) {
 	g, err := c.Guild()
 	if err != nil {
@@ -440,7 +445,7 @@ func (c *Channel) ChangedRoles() (roles []*Role, err error) {
 	return
 }
 
-// OverwritesFor returns the overwrites for the given user or role in the channel
+// OverwritesFor returns the overwrites for the given user or role in the channel.
 func (c *Channel) OverwritesFor(target IDGettable) (overwrite *PermissionOverwrite, err error) {
 	var permType string
 	switch target.(type) {
@@ -463,13 +468,13 @@ func (c *Channel) OverwritesFor(target IDGettable) (overwrite *PermissionOverwri
 	return nil, ErrStateNotFound
 }
 
-// Delete deletes the channel
+// Delete deletes the channel.
 func (c *Channel) Delete() (err error) {
 	_, err = c.Session.ChannelDelete(c.ID)
 	return
 }
 
-// CreateInvite creates an invite
+// CreateInvite creates an invite.
 // TODO: make a special object to create invites with
 func (c *Channel) CreateInvite(data Invite) (i *Invite, err error) {
 	return c.Session.ChannelInviteCreate(c.ID, data)
