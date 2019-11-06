@@ -43,8 +43,14 @@ type User struct {
 	// dm channel with the user, call CreateDM if it doesn't exist
 	DMChannel *Channel `json:"dm_channel,omitempty"`
 
+	// the flags on an user's account (the badges)
+	Flags int `json:"flags"` // TODO: make commands to parse this
+
+	// which nitro type the user has
+	PremiumType PremiumType `json:"premium_type"`
+
 	// The Session to call the API and retrieve other objects
-	Session *Session `json:"session,omitempty"`
+	Session *Session `json:"-"`
 
 	// guilds the user is in; used for caching
 	guilds []string
