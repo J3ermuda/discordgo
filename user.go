@@ -199,3 +199,48 @@ func (u User) GetHistory(limit int, beforeID, afterID, aroundID string) (st []*M
 func (u User) GetHistoryIterator() *HistoryIterator {
 	return NewHistoryIterator(u)
 }
+
+// IsDiscordEmployee returns true if the user is a discord employee
+func (u *User) IsDiscordEmployee() bool {
+	return u.Flags&1<<0 == 1<<0
+}
+
+// IsDiscordPartner returns true if the user is a discord partner
+func (u *User) IsDiscordPartner() bool {
+	return u.Flags&1<<1 == 1<<1
+}
+
+// IsHypeSquadEvents returns true if the user is part of HypeSquad Events
+func (u *User) IsHypeSquadEvents() bool {
+	return u.Flags&1<<2 == 1<<2
+}
+
+// IsBugHunter returns true if the user is a Bug Hunter
+func (u *User) IsBugHunter() bool {
+	return u.Flags&1<<3 == 1<<3
+}
+
+// IsHouseBravery returns true if the user is part of House Bravery
+func (u *User) IsHouseBravery() bool {
+	return u.Flags&1<<6 == 1<<6
+}
+
+// IsHouseBrilliance returns true if the user is part of House Brilliance
+func (u *User) IsHouseBrilliance() bool {
+	return u.Flags&1<<7 == 1<<7
+}
+
+// IsHouseBalance returns true if the user is part of House Balance
+func (u *User) IsHouseBalance() bool {
+	return u.Flags&1<<8 == 1<<8
+}
+
+// IsEarlySupporter returns true if the user is an Early Supporter
+func (u *User) IsEarlySupporter() bool {
+	return u.Flags&1<<9 == 1<<9
+}
+
+// IsTeamUser returns true if the user is part of Team User
+func (u *User) IsTeamUser() bool {
+	return u.Flags&1<<10 == 1<<10
+}
