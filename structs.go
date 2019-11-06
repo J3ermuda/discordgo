@@ -171,6 +171,9 @@ type Invite struct {
 	Temporary bool      `json:"temporary"`
 	Unique    bool      `json:"unique"`
 
+	TargetUser     *User `json:"target_user"`
+	TargetUserType int   `json:"target_user_type"`
+
 	// will only be filled when using InviteWithCounts
 	ApproximatePresenceCount int `json:"approximate_presence_count"`
 	ApproximateMemberCount   int `json:"approximate_member_count"`
@@ -354,6 +357,15 @@ const (
 	PremiumTier1
 	PremiumTier2
 	PremiumTier3
+)
+
+// PremiumType type definition
+type PremiumType int
+
+const (
+	NoNitro PremiumType = iota
+	NitroClassic
+	Nitro
 )
 
 // A GuildRole stores data for guild roles.
