@@ -153,14 +153,80 @@ func (c *Channel) Guild() (g *Guild, err error) {
 // A ChannelEdit holds Channel Field data for a channel edit.
 type ChannelEdit struct {
 	Name                 string                 `json:"name,omitempty"`
-	Topic                string                 `json:"topic,omitempty"`
-	NSFW                 bool                   `json:"nsfw,omitempty"`
+	Topic                string                 `json:"topic"`
+	NSFW                 bool                   `json:"nsfw"`
 	Position             int                    `json:"position"`
 	Bitrate              int                    `json:"bitrate,omitempty"`
-	UserLimit            int                    `json:"user_limit,omitempty"`
+	UserLimit            int                    `json:"user_limit"`
 	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites,omitempty"`
-	ParentID             string                 `json:"parent_id,omitempty"`
-	RateLimitPerUser     int                    `json:"rate_limit_per_user,omitempty"`
+	ParentID             string                 `json:"parent_id"`
+	RateLimitPerUser     int                    `json:"rate_limit_per_user"`
+}
+
+// NewEdit creates a new ChannelEdit to chain an edit with
+func (c *Channel) NewEdit() *ChannelEdit {
+	return &ChannelEdit{
+		Position:         c.Position,
+		RateLimitPerUser: c.RateLimitPerUser,
+		ParentID:         c.ParentID,
+		Topic:            c.Topic,
+		NSFW:             c.NSFW,
+		UserLimit:        c.UserLimit,
+	}
+}
+
+// SetName can be used to set the channel name in a chain
+func (c *ChannelEdit) SetName(name string) *ChannelEdit {
+	c.Name = name
+	return c
+}
+
+// SetTopic can be used to set the channel topic in a chain
+func (c *ChannelEdit) SetTopic(topic string) *ChannelEdit {
+	c.Topic = topic
+	return c
+}
+
+// IsNSFW can be used to set the channel to being NSFW in a chain
+func (c *ChannelEdit) IsNSFW() *ChannelEdit {
+	c.NSFW = true
+	return c
+}
+
+// IsNotNSFW can be used to set the channel to not be NSFW in a chain
+func (c *ChannelEdit) IsNotNSFW() *ChannelEdit {
+	c.NSFW = false
+	return c
+}
+
+// SetPosition can be used to set the channel position in a chain
+func (c *ChannelEdit) SetPosition(pos int) *ChannelEdit {
+	c.Position = pos
+	return c
+}
+
+// SetBitrate can be used to set the channel Bitrate in a chain
+func (c *ChannelEdit) SetBitrate(bitrate int) *ChannelEdit {
+	c.Bitrate = bitrate
+	return c
+}
+
+// SetParentID can be used to set the ID of the parent channel in a chain
+func (c *ChannelEdit) SetParentID(ID string) *ChannelEdit {
+	c.ParentID = ID
+	return c
+}
+
+// SetRateLimitPerUser can be used to set the slowdown in the channel in a chain
+func (c *ChannelEdit) SetRateLimitPerUser(limit int) *ChannelEdit {
+	c.RateLimitPerUser = limit
+	return c
+}
+
+// Edit edits the channel
+func (c *Channel) Edit(data *ChannelEdit) error {
+	_, err := c.Session.ChannelEditComplex(c.ID, data)
+	return err
 }
 
 // SendMessage sends a message to the channel.
