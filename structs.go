@@ -362,6 +362,7 @@ const (
 // PremiumType type definition
 type PremiumType int
 
+// Constants for PremiumTypes Nitro and Nitro Classic
 const (
 	NoNitro PremiumType = iota
 	NitroClassic

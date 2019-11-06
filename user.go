@@ -53,7 +53,7 @@ type User struct {
 	Session *Session `json:"-"`
 
 	// guilds the user is in; used for caching
-	guilds []string `json:"-"`
+	guilds []string
 }
 
 // String returns a unique identifier of the form username#discriminator

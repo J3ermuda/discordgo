@@ -84,6 +84,9 @@ type Channel struct {
 	// The user limit of the voice channel.
 	UserLimit int `json:"user_limit"`
 
+	// amount of seconds a user has to wait before sending another message
+	RateLimitPerUser int `json:"rate_limit_per_user"`
+
 	// The ID of the parent channel, if the channel is under a category
 	ParentID string `json:"parent_id"`
 
