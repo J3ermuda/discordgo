@@ -558,7 +558,7 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 
 		// If NATS outgoing is enabled, dispatch to NATS
 		if s.NATS != nil && s.NatsMode == 0 {
-			data, err := json.Marshal(e.Struct)
+			data, err := e.RawData.MarshalJSON()
 			if err == nil {
 				s.log(LogInformational, "dispatching event to NATS: %s", e.Type)
 				s.NATS.Publish(e.Type, data)
