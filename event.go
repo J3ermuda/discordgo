@@ -136,8 +136,8 @@ func (s *Session) AddHandler(handler interface{}) func() {
 		if subject == interfaceEventType {
 			subject = "*"
 		}
-		s.log(LogInformational, "Subscribing to NATS event: %s", eh.Type())
-		s.NATS.QueueSubscribe(eh.Type(), s.NatsQueueName, s.natsHandler)
+		s.log(LogInformational, "Subscribing to NATS event: %s", subject)
+		s.NATS.QueueSubscribe(subject, s.NatsQueueName, s.natsHandler)
 	}
 
 	return s.addEventHandler(eh)

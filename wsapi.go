@@ -551,6 +551,11 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 	if eh, ok := registeredInterfaceProviders[e.Type]; ok {
 		e.Struct = eh.New()
 
+		// Attempt to unmarshal our event.
+		if err = json.Unmarshal(e.RawData, e.Struct); err != nil {
+			s.log(LogError, "error unmarshalling %s event, %s", e.Type, err)
+		}
+
 		// If NATS outgoing is enabled, dispatch to NATS
 		if s.NATS != nil && s.NatsMode == 0 {
 			data, err := json.Marshal(e)
@@ -558,11 +563,6 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 				s.log(LogInformational, "dispatching event to NATS: %s", e.Type)
 				s.NATS.Publish(e.Type, data)
 			}
-		}
-
-		// Attempt to unmarshal our event.
-		if err = json.Unmarshal(e.RawData, e.Struct); err != nil {
-			s.log(LogError, "error unmarshalling %s event, %s", e.Type, err)
 		}
 
 		// Send event to any registered event handlers for it's type.
