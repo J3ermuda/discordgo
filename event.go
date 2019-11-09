@@ -132,6 +132,7 @@ func (s *Session) AddHandler(handler interface{}) func() {
 	}
 
 	if s.NATS != nil && s.NatsMode == 1 {
+		s.log(LogInformational, "Subscribing to NATS event: %s", eh.Type())
 		s.NATS.QueueSubscribe(eh.Type(), s.NatsQueueName, s.natsHandler)
 	}
 
@@ -196,6 +197,7 @@ func (s *Session) handle(t string, i interface{}) {
 
 // Handles events coming in from NATS
 func (s *Session) natsHandler(m *nats.Msg) {
+	s.log(LogInformational, "Got NATS event: %s", m.Subject)
 	var i interface{}
 	err := json.Unmarshal(m.Data, i)
 	if err == nil {
