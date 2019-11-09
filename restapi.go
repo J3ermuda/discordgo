@@ -56,6 +56,16 @@ func (s *Session) RequestWithBucketID(method, urlStr string, data interface{}, b
 		}
 	}
 
+	if method == "GET" && s.RESTCache != nil {
+		r, found := s.RESTCache.Get(urlStr)
+		if !found {
+			r, err = s.request(method, urlStr, "application/json", body, bucketID, 0)
+			s.RESTCache.Set(urlStr, r)
+			return r, err
+		}
+		return r, nil
+	}
+
 	return s.request(method, urlStr, "application/json", body, bucketID, 0)
 }
 

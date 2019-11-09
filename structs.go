@@ -90,6 +90,9 @@ type Session struct {
 	// used to deal with rate limits
 	Ratelimiter *RateLimiter
 
+	// Represents a cache for the REST API
+	RESTCache RestCache
+
 	// Event handlers
 	handlersMu   sync.RWMutex
 	handlers     map[string][]*eventHandlerInstance
