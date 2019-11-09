@@ -1,7 +1,6 @@
 package discordgo
 
 import (
-	"errors"
 	"strings"
 	"time"
 )
@@ -182,7 +181,7 @@ func (g *Guild) GetRole(roleID string) (role *Role, err error) {
 		}
 	}
 
-	err = errors.New("no role found")
+	err = ErrObjectNotFound
 	return
 }
 
@@ -206,7 +205,7 @@ func (g *Guild) GetRoleNamed(name string) (role *Role, err error) {
 		return
 	}
 
-	err = errors.New("no role found")
+	err = ErrObjectNotFound
 	return
 }
 
@@ -219,7 +218,7 @@ func (g *Guild) GetChannel(channelID string) (channel *Channel, err error) {
 		}
 	}
 
-	err = errors.New("no channel found")
+	err = ErrObjectNotFound
 	return
 }
 
@@ -244,7 +243,7 @@ func (g *Guild) GetChannelNamed(name string) (channel *Channel, err error) {
 		return
 	}
 
-	err = errors.New("no channel found")
+	err = ErrObjectNotFound
 	return
 }
 
@@ -257,7 +256,7 @@ func (g *Guild) GetMember(userID string) (member *Member, err error) {
 		}
 	}
 
-	err = errors.New("no member found")
+	err = ErrObjectNotFound
 	return
 }
 
@@ -284,6 +283,83 @@ func (g *Guild) FetchMembers(max int, after string) (err error) {
 	}
 
 	return nil
+}
+
+func (g *Guild) GetVoiceState(userID string) (voice *VoiceState, err error) {
+	for _, voice = range g.VoiceStates {
+		if voice.UserID == userID {
+			return voice, nil
+		}
+	}
+
+	err = ErrObjectNotFound
+	return
+}
+
+// NewEdit creates a new GuildParams to chain an edit with
+func (g *Guild) NewEdit() *GuildParams {
+	return &GuildParams{}
+}
+
+// SetName can be used to set the guild name in a chain
+func (g *GuildParams) SetName(name string) *GuildParams {
+	g.Name = name
+	return g
+}
+
+// SetRegion can be used to set the guild region in a chain
+func (g *GuildParams) SetRegion(region string) *GuildParams {
+	g.Region = region
+	return g
+}
+
+// SetVerificationLevel can be used to set the guild VerificationLevel in a chain
+func (g *GuildParams) SetVerificationLevel(level VerificationLevel) *GuildParams {
+	g.VerificationLevel = &level
+	return g
+}
+
+// SetDefaultMessageNotifications can be used to set the guild DefaultMessageNotifications in a chain
+func (g *GuildParams) SetDefaultMessageNotifications(setting int) *GuildParams {
+	g.DefaultMessageNotifications = setting
+	return g
+}
+
+// SetRegion can be used to set the guild region in a chain
+func (g *GuildParams) SetAfkChannel(channel *Channel) *GuildParams {
+	g.AfkChannelID = channel.ID
+	return g
+}
+
+// SetAfkTimeout can be used to set the guild AfkTimeout in a chain
+func (g *GuildParams) SetAfkTimeout(timeout int) *GuildParams {
+	g.AfkTimeout = timeout
+	return g
+}
+
+// SetIcon can be used to set the guild icon in a chain
+func (g *GuildParams) SetIcon(icon string) *GuildParams {
+	g.Icon = icon
+	return g
+}
+
+// SetOwner can be used to set the guild owner in a chain
+// (this is only possible if the bot is the owner)
+func (g *GuildParams) SetOwner(user *User) *GuildParams {
+	g.OwnerID = user.ID
+	return g
+}
+
+// SetSplash can be used to set the guild Splash in a chain
+func (g *GuildParams) SetSplash(splash string) *GuildParams {
+	g.Splash = splash
+	return g
+}
+
+// Edit edits the guild with the given GuildParams
+// edit  : the GuildParams saying what to edit
+func (g *Guild) Edit(edit *GuildParams) (st *Guild, err error) {
+	return g.Session.GuildEdit(g.ID, edit)
 }
 
 // Ban bans the given user from the guild.

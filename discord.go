@@ -14,7 +14,6 @@
 package discordgo
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -22,9 +21,6 @@ import (
 
 // VERSION of DiscordGo, follows Semantic Versioning. (http://semver.org/)
 const VERSION = "0.19.0"
-
-// ErrMFA will be risen by New when the user has 2FA.
-var ErrMFA = errors.New("account has 2FA enabled")
 
 // New creates a new Discord session and will automate some startup
 // tasks if given enough information to do so.  Currently you can pass zero

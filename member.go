@@ -31,6 +31,9 @@ type Member struct {
 
 	// When the user used their Nitro boost on the server
 	PremiumSince Timestamp `json:"premium_since"`
+
+	// Guild gets set when GetGuild gets called for the first time as an optimisation technique
+	Guild *Guild `json:"-"`
 }
 
 // String returns a unique identifier of the form displayName#discriminator
@@ -106,7 +109,18 @@ func (m *Member) GetDisplayName() string {
 
 // GetGuild returns the guild object where the Member belongs to
 func (m *Member) GetGuild() (g *Guild, err error) {
-	return m.User.Session.State.Guild(m.GuildID)
+	if m.Guild != nil {
+		g = m.Guild
+		return
+	}
+
+	g, err = m.User.Session.State.Guild(m.GuildID)
+	if err != nil {
+		return
+	}
+
+	m.Guild = g
+	return
 }
 
 // GetRoles returns a slice with all roles the Member has, sorted from highest to lowest
@@ -155,6 +169,16 @@ func (m *Member) GetTopRole() (role *Role, err error) {
 
 	role = roles[0]
 	return
+}
+
+// GetVoiceState returns the members voice state
+func (m *Member) GetVoiceState() (voice *VoiceState, err error) {
+	g, err := m.GetGuild()
+	if err != nil {
+		return
+	}
+
+	return g.GetVoiceState(m.GetID())
 }
 
 // Kick kicks the member from their guild
