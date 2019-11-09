@@ -14,7 +14,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,18 +23,6 @@ import (
 
 	"github.com/gorilla/websocket"
 )
-
-// ErrWSAlreadyOpen is thrown when you attempt to open
-// a websocket that already is open.
-var ErrWSAlreadyOpen = errors.New("web socket already opened")
-
-// ErrWSNotFound is thrown when you attempt to use a websocket
-// that doesn't exist
-var ErrWSNotFound = errors.New("no websocket connection exists")
-
-// ErrWSShardBounds is thrown when you try to use a shard ID that is
-// less than the total shard count
-var ErrWSShardBounds = errors.New("ShardID must be less than ShardCount")
 
 type resumePacket struct {
 	Op   int `json:"op"`

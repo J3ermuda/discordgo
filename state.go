@@ -13,17 +13,9 @@
 package discordgo
 
 import (
-	"errors"
 	"sort"
 	"sync"
 )
-
-// ErrNilState is returned when the state is nil.
-var ErrNilState = errors.New("state not instantiated, please use discordgo.New() or assign Session.State")
-
-// ErrStateNotFound is returned when the state cache
-// requested is not found
-var ErrStateNotFound = errors.New("state cache not found")
 
 // A State contains the current known state.
 // As discord sends this in a READY blob, it seems reasonable to simply

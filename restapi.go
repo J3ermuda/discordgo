@@ -13,7 +13,6 @@ package discordgo
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"image"
 	_ "image/jpeg" // For JPEG decoding
@@ -28,17 +27,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
-
-// All error constants
-var (
-	ErrJSONUnmarshal           = errors.New("json unmarshal")
-	ErrStatusOffline           = errors.New("You can't set your Status to offline")
-	ErrVerificationLevelBounds = errors.New("VerificationLevel out of bounds, should be between 0 and 3")
-	ErrPruneDaysBounds         = errors.New("the number of days should be more than or equal to 1")
-	ErrGuildNoIcon             = errors.New("guild does not have an icon set")
-	ErrGuildNoSplash           = errors.New("guild does not have a splash set")
-	ErrUnauthorized            = errors.New("HTTP request was unauthorized. This could be because the provided token was not a bot token. Please add \"Bot \" to the start of your token. https://discordapp.com/developers/docs/reference#authentication-example-bot-token-authorization-header")
 )
 
 // Request is the same as RequestWithBucketID but the bucket id is the same as the urlStr
@@ -405,7 +393,7 @@ func (s *Session) GuildCreate(name string) (st *Guild, err error) {
 // GuildEdit edits a new Guild
 // guildID   : The ID of a Guild
 // g 		 : A GuildParams struct with the values Name, Region and VerificationLevel defined.
-func (s *Session) GuildEdit(guildID string, g GuildParams) (st *Guild, err error) {
+func (s *Session) GuildEdit(guildID string, g *GuildParams) (st *Guild, err error) {
 
 	// Bounds checking for VerificationLevel, interval: [0, 4]
 	if g.VerificationLevel != nil {
