@@ -29,7 +29,7 @@ var (
 	// requested is not found
 	ErrStateNotFound = errors.New("state cache not found")
 
-	// ErrPositionBounds gets returned when trying to set the role position to lower than 1
+	// ErrRolePositionBounds gets returned when trying to set the role position to lower than 1
 	ErrRolePositionBounds = errors.New("the position cannot be lower than 1")
 
 	// ErrUnmovableDefaultRole gets returned when trying to move the default role as this is impossible
