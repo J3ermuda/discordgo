@@ -285,6 +285,8 @@ func (g *Guild) FetchMembers(max int, after string) (err error) {
 	return nil
 }
 
+// GetVoiceState returns the the VoiceState of the member with the given userID
+// userID  : userID of the member whose VoiceState should be returned
 func (g *Guild) GetVoiceState(userID string) (voice *VoiceState, err error) {
 	for _, voice = range g.VoiceStates {
 		if voice.UserID == userID {
@@ -325,7 +327,7 @@ func (g *GuildParams) SetDefaultMessageNotifications(setting int) *GuildParams {
 	return g
 }
 
-// SetRegion can be used to set the guild region in a chain
+// SetAfkChannel can be used to set the guild region in a chain
 func (g *GuildParams) SetAfkChannel(channel *Channel) *GuildParams {
 	g.AfkChannelID = channel.ID
 	return g

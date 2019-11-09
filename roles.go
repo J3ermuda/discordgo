@@ -191,7 +191,7 @@ func (r *Role) EditComplex(data *RoleEdit) (edited *Role, err error) {
 // position    : the new position of the role
 func (r *Role) Move(position int) (err error) {
 	if position <= 0 {
-		return ErrOutOfRange
+		return ErrRolePositionBounds
 	}
 
 	if r.IsDefault() {
