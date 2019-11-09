@@ -202,15 +202,11 @@ func (s *Session) handle(t string, i interface{}) {
 // Handles events coming in from NATS
 func (s *Session) natsHandler(m *nats.Msg) {
 	s.log(LogInformational, "Got NATS event: %s", m.Subject)
-	var e Event
-	err := json.Unmarshal(m.Data, &e)
+	var i interface{}
+	err := json.Unmarshal(m.Data, i)
 	if err == nil {
-		// Attempt to unmarshal our event.
-		if err = json.Unmarshal(e.RawData, e.Struct); err != nil {
-			s.log(LogError, "error unmarshalling %s event, %s", e.Type, err)
-		}
-		s.log(LogDebug, "struct data: %s", e.Struct)
-		s.handleEvent(e.Type, e.Struct)
+		s.log(LogDebug, "struct data: %s", i)
+		s.handleEvent(m.Subject, i)
 	} else {
 		s.log(LogError, "Error processing event from NATS: %s", err)
 	}
