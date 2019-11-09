@@ -198,7 +198,7 @@ func (s *Session) handle(t string, i interface{}) {
 func (s *Session) natsHandler(m *nats.Msg) {
 	var i interface{}
 	err := json.Unmarshal(m.Data, i)
-	if err != nil {
+	if err == nil {
 		s.handleEvent(m.Subject, i)
 	}
 }
