@@ -205,6 +205,11 @@ func (s *Session) natsHandler(m *nats.Msg) {
 	var e Event
 	err := json.Unmarshal(m.Data, &e)
 	if err == nil {
+		// Attempt to unmarshal our event.
+		if err = json.Unmarshal(e.RawData, e.Struct); err != nil {
+			s.log(LogError, "error unmarshalling %s event, %s", e.Type, err)
+		}
+		s.log(LogDebug, "struct data: %s", e.Struct)
 		s.handleEvent(e.Type, e.Struct)
 	} else {
 		s.log(LogError, "Error processing event from NATS: %s", err)
