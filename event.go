@@ -1,5 +1,11 @@
 package discordgo
 
+import (
+	"encoding/json"
+
+	nats "github.com/nats-io/nats.go"
+)
+
 // EventHandler is an interface for Discord events.
 type EventHandler interface {
 	// Type returns the type of event this handler belongs to.
@@ -125,6 +131,10 @@ func (s *Session) AddHandler(handler interface{}) func() {
 		return func() {}
 	}
 
+	if s.NATS != nil && s.NatsMode == 1 {
+		s.NATS.QueueSubscribe(eh.Type(), s.NatsQueueName, s.natsHandler)
+	}
+
 	return s.addEventHandler(eh)
 }
 
@@ -181,6 +191,15 @@ func (s *Session) handle(t string, i interface{}) {
 			}
 		}
 		s.onceHandlers[t] = nil
+	}
+}
+
+// Handles events coming in from NATS
+func (s *Session) natsHandler(m *nats.Msg) {
+	var i interface{}
+	err := json.Unmarshal(m.Data, i)
+	if err != nil {
+		s.handleEvent(m.Subject, i)
 	}
 }
 

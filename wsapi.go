@@ -51,6 +51,10 @@ type resumePacket struct {
 func (s *Session) Open() error {
 	s.log(LogInformational, "called")
 
+	if s.NATS != nil && s.NatsMode == 1 {
+		return nil
+	}
+
 	var err error
 
 	// Prevent Open or other major Session functions from
@@ -546,6 +550,14 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 	// Map event to registered event handlers and pass it along to any registered handlers.
 	if eh, ok := registeredInterfaceProviders[e.Type]; ok {
 		e.Struct = eh.New()
+
+		// If NATS outgoing is enabled, dispatch to NATS
+		if s.NATS != nil && s.NatsMode == 0 {
+			data, err := e.RawData.MarshalJSON()
+			if err != nil {
+				s.NATS.Publish(e.Type, data)
+			}
+		}
 
 		// Attempt to unmarshal our event.
 		if err = json.Unmarshal(e.RawData, e.Struct); err != nil {

@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	nats "github.com/nats-io/nats.go"
 )
 
 // A Session represents a connection to the Discord API.
@@ -92,6 +93,15 @@ type Session struct {
 
 	// Represents a cache for the REST API
 	RESTCache RestCache
+
+	// NATS client for sending and/or receiving NATS events
+	NATS *nats.Conn
+
+	// 0 = Send, 1 = Receive
+	NatsMode uint
+
+	// Name of the NATS queue to listen on (usually the name of your microservice)
+	NatsQueueName string
 
 	// Event handlers
 	handlersMu   sync.RWMutex
