@@ -262,7 +262,7 @@ func (g *Guild) GetMember(userID string) (member *Member, err error) {
 
 // Me retrieves the member object representing this client in the guild
 func (g *Guild) Me() (member *Member, err error) {
-	return g.GetMember(g.Session.State.User.ID)
+	return g.GetMember(g.Session.State.MyUser().ID)
 }
 
 // FetchMembers fetches count members of this guild from discord and adds them to the state.

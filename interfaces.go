@@ -42,3 +42,32 @@ type Mentionable interface {
 type TimeSortable interface {
 	CreatedAt() (creation time.Time, err error)
 }
+
+// StateCache represents a generic state cache
+type StateCache interface {
+	GuildAdd(*Guild, *Session) error
+	GuildRemove(*Guild) error
+	Guild(string) (*Guild, error)
+	PresenceAdd(string, *Presence) error
+	PresenceRemove(string, *Presence) error
+	Presence(string, string) (*Presence, error)
+	MemberAdd(*Member, *Session) error
+	MemberRemove(*Member) error
+	Member(string, string) (*Member, error)
+	GetUser(string) (*User, error)
+	MyUser() *User
+	RoleAdd(string, *Role) error
+	RoleRemove(string, string) error
+	Role(string, string) (*Role, error)
+	ChannelAdd(*Channel) error
+	ChannelRemove(*Channel) error
+	Channel(string) (*Channel, error)
+	Emoji(string, string) (*Emoji, error)
+	EmojiAdd(string, *Emoji) error
+	EmojisAdd(string, []*Emoji) error
+	MessageAdd(*Message, *Session) error
+	MessageRemove(*Message) error
+	Message(string, string) (*Message, error)
+	OnInterface(*Session, interface{}) error
+	UserColor(string, string) Color
+}

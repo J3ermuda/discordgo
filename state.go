@@ -59,6 +59,11 @@ func NewState() *State {
 	}
 }
 
+// MyUser returns the bots user
+func (s *State) MyUser() *User {
+	return s.User
+}
+
 func (s *State) addUser(guildID string, user *User) {
 	if _, ok := s.userMap[user.ID]; !ok {
 		s.userMap[user.ID] = user

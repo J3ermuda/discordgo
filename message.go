@@ -332,7 +332,7 @@ func (m *Message) AddReaction(emoji *Emoji) (err error) {
 // user : the user or member who added the reaction
 func (m *Message) RemoveReaction(emoji *Emoji, user IDGettable) (err error) {
 	id := user.GetID()
-	if id == m.Session.State.User.ID {
+	if id == m.Session.State.MyUser().ID {
 		id = "@me"
 	}
 	return m.Session.MessageReactionRemove(m.ChannelID, m.ID, emoji.APIName(), user.GetID())
