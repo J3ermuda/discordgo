@@ -1,7 +1,6 @@
 package discordgo
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -119,6 +118,59 @@ func (r *Role) GetMembers() (members []*Member, err error) {
 	return
 }
 
+// NewEdit creates a new RoleEdit to chain an edit with
+func (r *Role) NewEdit() *RoleEdit {
+	return &RoleEdit{
+		Name:        r.Name,
+		Color:       r.Color,
+		Hoist:       r.Hoist,
+		Permissions: r.Permissions,
+		Mentionable: r.Mentionable,
+	}
+}
+
+// SetName can be used to set the role name in a chain
+func (r *RoleEdit) SetName(name string) *RoleEdit {
+	r.Name = name
+	return r
+}
+
+// SetColor can be used to set the role color in a chain
+func (r *RoleEdit) SetColor(color Color) *RoleEdit {
+	r.Color = color
+	return r
+}
+
+// IsHoisted can be used to set the role to being hoisted in a chain
+func (r *RoleEdit) IsHoisted() *RoleEdit {
+	r.Hoist = true
+	return r
+}
+
+// IsNotHoisted can be used to set the role to not be hoisted in a chain
+func (r *RoleEdit) IsNotHoisted() *RoleEdit {
+	r.Hoist = false
+	return r
+}
+
+// SetPermissions can be used to set the role permissions in a chain
+func (r *RoleEdit) SetPermissions(perms Permissions) *RoleEdit {
+	r.Permissions = perms
+	return r
+}
+
+// IsMentionable can be used to set the role to being mentionable in a chain
+func (r *RoleEdit) IsMentionable() *RoleEdit {
+	r.Mentionable = true
+	return r
+}
+
+// IsNotMentionable can be used to set the role to not be mentionable in a chain
+func (r *RoleEdit) IsNotMentionable() *RoleEdit {
+	r.Mentionable = false
+	return r
+}
+
 // Edit updates the Role with new values
 // name      : The name of the Role.
 // color     : The color of the role (decimal, not hex).
@@ -139,11 +191,11 @@ func (r *Role) EditComplex(data *RoleEdit) (edited *Role, err error) {
 // position    : the new position of the role
 func (r *Role) Move(position int) (err error) {
 	if position <= 0 {
-		return errors.New("role position can not be 0 or lower")
+		return ErrRolePositionBounds
 	}
 
 	if r.IsDefault() {
-		return errors.New("can't move the default role")
+		return ErrUnmovableDefaultRole
 	}
 
 	var editedRoles Roles

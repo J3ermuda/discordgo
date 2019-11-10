@@ -1,19 +1,8 @@
 package discordgo
 
 import (
-	"errors"
 	"fmt"
 	"time"
-)
-
-var (
-	// ErrNotACustomEmoji gets thrown when a method gets called on an unicode emoji
-	// that can only be called on custom emojis
-	ErrNotACustomEmoji = errors.New("you can't do this to a custom emoji")
-
-	// ErrUnknownEmojiGuild gets thrown when the method requires the emoji to be from
-	// a guild that is cached, but it isn't
-	ErrUnknownEmojiGuild = errors.New("the guild that this emoji comes from is not in the cache")
 )
 
 // Emoji struct holds data related to Emoji's

@@ -1,23 +1,10 @@
 package discordgo
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"time"
 )
-
-// ErrNotATextChannel gets returned when a method gets called on a channel
-// that does not support sending messages to them.
-var ErrNotATextChannel = errors.New("not a text or dm channel")
-
-// ErrNotAVoiceChannel gets thrown when a method gets called on a channel
-// that is not a Guild Voice channel but does need to be for the method to work.
-var ErrNotAVoiceChannel = errors.New("not a voice channel")
-
-// ErrNotAGuildChannel gets thrown when a method gets called on a channel
-// that is not inside of a Guild but does need to be for the method to work.
-var ErrNotAGuildChannel = errors.New("not a channel in a guild")
 
 // ChannelType is the type of a Channel.
 type ChannelType int
@@ -482,7 +469,7 @@ func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwri
 	case Role:
 		permType = "role"
 	default:
-		err = errors.New("target parameter must be either a user, member or a role")
+		err = ErrNotOverwriteSettable
 		return
 	}
 
@@ -525,7 +512,7 @@ func (c *Channel) OverwritesFor(target IDGettable) (overwrite *PermissionOverwri
 	case Role:
 		permType = "role"
 	default:
-		err = errors.New("target parameter must be either a user, member or a role")
+		err = ErrNotOverwriteSettable
 		return
 	}
 
