@@ -51,6 +51,20 @@ type resumePacket struct {
 func (s *Session) Open() error {
 	s.log(LogInformational, "called")
 
+	// A basic state is a hard requirement for Voice.
+	// We create it here so the below READY/RESUMED packet can populate
+	// the state :)
+	// XXX: Move to New() func?
+	if s.State == nil {
+		state := NewState()
+		state.TrackChannels = false
+		state.TrackEmojis = false
+		state.TrackMembers = false
+		state.TrackRoles = false
+		state.TrackVoice = false
+		s.State = state
+	}
+
 	if s.NATS != nil && s.NatsMode == 1 {
 		return nil
 	}
@@ -156,20 +170,6 @@ func (s *Session) Open() error {
 			return err
 		}
 
-	}
-
-	// A basic state is a hard requirement for Voice.
-	// We create it here so the below READY/RESUMED packet can populate
-	// the state :)
-	// XXX: Move to New() func?
-	if s.State == nil {
-		state := NewState()
-		state.TrackChannels = false
-		state.TrackEmojis = false
-		state.TrackMembers = false
-		state.TrackRoles = false
-		state.TrackVoice = false
-		s.State = state
 	}
 
 	// Now Discord should send us a READY or RESUMED packet.
