@@ -145,7 +145,10 @@ func (e AuditLogEntry) CreatedAt() (creation time.Time, err error) {
 }
 
 // Changes returns a before and after AuditLogChanges for the changes in the AuditLogEntry
-func (e *AuditLogEntry) Changes() (before, after AuditLogChanges) {
+func (e *AuditLogEntry) Changes() (before, after *AuditLogChanges) {
+	before = &AuditLogChanges{}
+	after = &AuditLogChanges{}
+
 	for _, change := range e.RawChanges {
 		switch change.Key {
 		case "name":

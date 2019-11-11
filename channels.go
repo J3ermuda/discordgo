@@ -462,11 +462,11 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwrite) (err error) {
 	var permType string
 	switch target.(type) {
-	case User:
+	case *User:
 		permType = "member"
-	case Member:
+	case *Member:
 		permType = "member"
-	case Role:
+	case *Role:
 		permType = "role"
 	default:
 		err = ErrNotOverwriteSettable
@@ -505,11 +505,11 @@ func (c *Channel) ChangedRoles() (roles []*Role, err error) {
 func (c *Channel) OverwritesFor(target IDGettable) (overwrite *PermissionOverwrite, err error) {
 	var permType string
 	switch target.(type) {
-	case User:
+	case *User:
 		permType = "member"
-	case Member:
+	case *Member:
 		permType = "member"
-	case Role:
+	case *Role:
 		permType = "role"
 	default:
 		err = ErrNotOverwriteSettable
