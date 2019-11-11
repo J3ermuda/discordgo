@@ -1,5 +1,11 @@
 package discordgo
 
+import (
+	"encoding/json"
+
+	nats "github.com/nats-io/nats.go"
+)
+
 // EventHandler is an interface for Discord events.
 type EventHandler interface {
 	// Type returns the type of event this handler belongs to.
@@ -125,6 +131,15 @@ func (s *Session) AddHandler(handler interface{}) func() {
 		return func() {}
 	}
 
+	if s.NATS != nil && s.NatsMode == 1 {
+		subject := eh.Type()
+		if subject == interfaceEventType {
+			subject = "*"
+		}
+		s.log(LogInformational, "Subscribing to NATS event: %s", subject)
+		s.NATS.QueueSubscribe(subject, s.NatsQueueName, s.natsHandler)
+	}
+
 	return s.addEventHandler(eh)
 }
 
@@ -184,6 +199,18 @@ func (s *Session) handle(t string, i interface{}) {
 	}
 }
 
+// Handles events coming in from NATS
+func (s *Session) natsHandler(m *nats.Msg) {
+	if eh, ok := registeredInterfaceProviders[m.Subject]; ok {
+		i := eh.New()
+		// Attempt to unmarshal our event.
+		if err := json.Unmarshal(m.Data, i); err != nil {
+			s.log(LogError, "error unmarshalling %s event, %s", m.Subject, err)
+		}
+		s.handleEvent(m.Subject, i)
+	}
+}
+
 // Handles an event type by calling internal methods, firing handlers and firing the
 // interface{} event.
 func (s *Session) handleEvent(t string, i interface{}) {
@@ -216,12 +243,35 @@ func setGuildIds(g *Guild) {
 	}
 }
 
+func (s *Session) setSession(g *Guild) {
+	g.Session = s
+	for _, c := range g.Channels {
+		c.Session = s
+	}
+
+	for _, m := range g.Members {
+		m.User.Session = s
+		m.GuildID = g.ID
+	}
+
+	for _, r := range g.Roles {
+		r.Session = s
+		r.Guild = g
+	}
+
+	for _, e := range g.Emojis {
+		e.Session = s
+		e.Guild = g
+	}
+}
+
 // onInterface handles all internal events and routes them to the appropriate internal handler.
 func (s *Session) onInterface(i interface{}) {
 	switch t := i.(type) {
 	case *Ready:
 		for _, g := range t.Guilds {
 			setGuildIds(g)
+			s.setSession(g)
 		}
 		s.onReady(t)
 	case *GuildCreate:

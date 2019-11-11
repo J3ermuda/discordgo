@@ -14,7 +14,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,18 +23,6 @@ import (
 
 	"github.com/gorilla/websocket"
 )
-
-// ErrWSAlreadyOpen is thrown when you attempt to open
-// a websocket that already is open.
-var ErrWSAlreadyOpen = errors.New("web socket already opened")
-
-// ErrWSNotFound is thrown when you attempt to use a websocket
-// that doesn't exist
-var ErrWSNotFound = errors.New("no websocket connection exists")
-
-// ErrWSShardBounds is thrown when you try to use a shard ID that is
-// less than the total shard count
-var ErrWSShardBounds = errors.New("ShardID must be less than ShardCount")
 
 type resumePacket struct {
 	Op   int `json:"op"`
@@ -50,6 +37,10 @@ type resumePacket struct {
 // See: https://discordapp.com/developers/docs/topics/gateway#connecting
 func (s *Session) Open() error {
 	s.log(LogInformational, "called")
+
+	if s.NATS != nil && s.NatsMode == 1 {
+		return nil
+	}
 
 	var err error
 
@@ -551,6 +542,15 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 			s.log(LogError, "error unmarshalling %s event, %s", e.Type, err)
 		}
 
+		// If NATS outgoing is enabled, dispatch to NATS
+		if s.NATS != nil && s.NatsMode == 0 {
+			data, err := e.RawData.MarshalJSON()
+			if err == nil {
+				s.log(LogInformational, "dispatching event to NATS: %s", e.Type)
+				s.NATS.Publish(e.Type, data)
+			}
+		}
+
 		// Send event to any registered event handlers for it's type.
 		// Because the above doesn't cancel this, in case of an error
 		// the struct could be partially populated or at default values.
@@ -674,7 +674,7 @@ func (s *Session) onVoiceStateUpdate(st *VoiceStateUpdate) {
 	}
 
 	// We only care about events that are about us.
-	if s.State.User.ID != st.UserID {
+	if s.State.MyUser().ID != st.UserID {
 		return
 	}
 
