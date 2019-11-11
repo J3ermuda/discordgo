@@ -25,8 +25,8 @@ type Emoji struct {
 	// If the emoji is animated
 	Animated bool `json:"animated"`
 
-	// The user that created the emoji, his can only be retrieved when fetching the emoji
-	User *User `json:"user,omitempty"`
+	// If the emoji is available to use
+	Available     bool     `json:"available"`
 
 	// The Session to call the API and retrieve other objects
 	Session *Session `json:"-"`
