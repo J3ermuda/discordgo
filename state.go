@@ -983,7 +983,14 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		}
 
 		if s.MaxMessageCount != 0 {
-			err = s.MessageAdd(t.Message, se)
+			var old *Message
+			old, err = s.Message(t.ChannelID, t.ID)
+			if err == nil {
+				oldCopy := *old
+				t.BeforeUpdate = &oldCopy
+			}
+
+			err = s.MessageAdd(t.Message)
 		}
 	case *MessageDelete:
 		if s.MaxMessageCount != 0 {
