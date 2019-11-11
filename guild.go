@@ -173,6 +173,11 @@ func (g Guild) CreatedAt() (creation time.Time, err error) {
 	return SnowflakeToTime(g.ID)
 }
 
+// GetIconURL returns the URL to the guild icon
+func (g *Guild) GetIconURL() string {
+	return EndpointGuildIcon(g.ID, g.Icon)
+}
+
 // GetRole gets the role with the given ID as it is stored in Guild.Roles
 func (g *Guild) GetRole(roleID string) (role *Role, err error) {
 	for _, role = range g.Roles {
