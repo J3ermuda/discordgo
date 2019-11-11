@@ -931,9 +931,6 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		for _, e := range t.Emojis {
 			e.Session = se
 			e.Guild = g
-			if e.User != nil {
-				e.User.Session = se
-			}
 		}
 		if s.TrackEmojis {
 			err = s.EmojisAdd(t.GuildID, t.Emojis)
@@ -990,7 +987,7 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 				t.BeforeUpdate = &oldCopy
 			}
 
-			err = s.MessageAdd(t.Message)
+			err = s.MessageAdd(t.Message, se)
 		}
 	case *MessageDelete:
 		if s.MaxMessageCount != 0 {

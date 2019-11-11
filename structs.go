@@ -14,7 +14,6 @@ package discordgo
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
