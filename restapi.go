@@ -1767,15 +1767,8 @@ func (s *Session) ChannelInvites(channelID string) (st []*Invite, err error) {
 
 // ChannelInviteCreate creates a new invite for the given channel.
 // channelID   : The ID of a Channel
-// i           : An Invite struct with the values MaxAge, MaxUses and Temporary defined.
-func (s *Session) ChannelInviteCreate(channelID string, i Invite) (st *Invite, err error) {
-
-	data := struct {
-		MaxAge    int  `json:"max_age"`
-		MaxUses   int  `json:"max_uses"`
-		Temporary bool `json:"temporary"`
-		Unique    bool `json:"unique"`
-	}{i.MaxAge, i.MaxUses, i.Temporary, i.Unique}
+// data        : An InviteBuilder struct.
+func (s *Session) ChannelInviteCreate(channelID string, data *InviteBuilder) (st *Invite, err error) {
 
 	body, err := s.RequestWithBucketID("POST", EndpointChannelInvites(channelID), data, EndpointChannelInvites(channelID))
 	if err != nil {
