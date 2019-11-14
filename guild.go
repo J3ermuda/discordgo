@@ -186,8 +186,7 @@ func (g *Guild) GetRole(roleID string) (role *Role, err error) {
 		}
 	}
 
-	err = ErrObjectNotFound
-	return
+	return nil, ErrObjectNotFound
 }
 
 // GetRoleNamed gets the role with the given name as it is stored in Guild.Roles
@@ -210,8 +209,7 @@ func (g *Guild) GetRoleNamed(name string) (role *Role, err error) {
 		return
 	}
 
-	err = ErrObjectNotFound
-	return
+	return nil, ErrObjectNotFound
 }
 
 // GetChannel gets the channel with the given ID as it is stored in Guild.Channels
@@ -223,8 +221,7 @@ func (g *Guild) GetChannel(channelID string) (channel *Channel, err error) {
 		}
 	}
 
-	err = ErrObjectNotFound
-	return
+	return nil, ErrObjectNotFound
 }
 
 // GetChannelNamed gets the channel with the given name as it is stored in Guild.Channels
@@ -248,8 +245,7 @@ func (g *Guild) GetChannelNamed(name string) (channel *Channel, err error) {
 		return
 	}
 
-	err = ErrObjectNotFound
-	return
+	return nil, ErrObjectNotFound
 }
 
 // GetMember gets the member with the given ID from the guild.
@@ -261,8 +257,7 @@ func (g *Guild) GetMember(userID string) (member *Member, err error) {
 		}
 	}
 
-	err = ErrObjectNotFound
-	return
+	return nil, ErrObjectNotFound
 }
 
 // Me retrieves the member object representing this client in the guild
