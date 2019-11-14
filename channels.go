@@ -371,7 +371,7 @@ func (c *Channel) MessagesBulkDelete(messages []*Message) (err error) {
 
 	for _, message := range messages {
 		age, _ := message.CreatedAt()
-		if age.After(twoWeeks) {
+		if age.Before(twoWeeks) {
 			tooOld = append(tooOld, message)
 		} else {
 			toDelete = append(toDelete, message.ID)
