@@ -217,8 +217,10 @@ func (s *Session) handleEvent(t string, i interface{}) {
 	s.handlersMu.RLock()
 	defer s.handlersMu.RUnlock()
 
-	// All events are dispatched internally first.
-	s.onInterface(i)
+	if s.State != nil {
+		// All events are dispatched internally first.
+		s.onInterface(i)
+	}
 
 	// Then they are dispatched to anyone handling interface{} events.
 	s.handle(interfaceEventType, i)
@@ -283,6 +285,11 @@ func (s *Session) onInterface(i interface{}) {
 	case *VoiceStateUpdate:
 		go s.onVoiceStateUpdate(t)
 	}
+
+	if s.State == nil {
+		panic("the state is nil in onInterface")
+	}
+
 	err := s.State.OnInterface(s, i)
 	if err != nil {
 		s.log(LogDebug, "error dispatching internal event, %s", err)
