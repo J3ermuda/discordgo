@@ -113,8 +113,9 @@ func TestChannel_MessagesBulkDelete(t *testing.T) {
 	f := dg.AddHandler(func(s *Session, event *MessageDeleteBulk) {
 		if Contains(event.Messages, msg1.ID) && Contains(event.Messages, msg2.ID) {
 			done <- true
+		} else {
+			t.Fatal("bulk delete did not delete the messages")
 		}
-		t.Fatal("bulk delete did not delete the messages")
 	})
 
 	err = c.MessagesBulkDelete([]*Message{msg1, msg2})
