@@ -125,6 +125,10 @@ func TestOpenClose(t *testing.T) {
 	if err != nil {
 		t.Fatal("Opening of actual connection with discord failed")
 	}
+
+	if dg.State == nil {
+		t.Fatal("state is nil")
+	}
 }
 
 func TestAddHandler(t *testing.T) {
@@ -239,7 +243,7 @@ func TestHandlerSessionInserter(t *testing.T) {
 	}
 
 	select {
-	case <-time.After(20000 * time.Millisecond):
+	case <-time.After(2000 * time.Millisecond):
 		t.Fatal("the handlers weren't called")
 	case <-done:
 	}

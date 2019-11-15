@@ -79,6 +79,9 @@ type Channel struct {
 
 	// The Session to call the API and retrieve other objects
 	Session *Session `json:"-"`
+
+	// The cached guild object
+	guild *Guild
 }
 
 // String returns the name of the channel for easy formatting.
@@ -111,30 +114,66 @@ func (c *Channel) GetParent() (*Channel, error) {
 }
 
 // PermissionsSynced returns true if the channel permissions are synced with their category.
-func (c *Channel) PermissionsSynced() (bool, error) {
+func (c *Channel) PermissionsSynced() bool {
 	if c.ParentID == "" {
-		return false, nil
+		return false
 	}
 
 	p, err := c.GetParent()
 	if err != nil {
 		if err == ErrStateNotFound {
-			return false, nil
+			return false
 		}
-		return false, err
+		return false
 	}
 
-	return reflect.DeepEqual(p.PermissionOverwrites, c.PermissionOverwrites), nil
+	return reflect.DeepEqual(p.PermissionOverwrites, c.PermissionOverwrites)
 }
 
 // Guild retrieves the guild belonging to the channel.
 func (c *Channel) Guild() (g *Guild, err error) {
+	if c.guild != nil {
+		return c.guild, nil
+	}
+
 	if c.GuildID == "" {
 		err = ErrNotAGuildChannel
 		return
 	}
 
-	return c.Session.State.Guild(c.GuildID)
+	g, err = c.Session.State.Guild(c.GuildID)
+	if err != nil {
+		return
+	}
+
+	c.guild = g
+	return
+}
+
+// MembersInVoice returns all the members currently in this voice channel
+func (c *Channel) MembersInVoice() (members []*Member, err error) {
+	if c.Type != ChannelTypeGuildVoice {
+		err = ErrNotAVoiceChannel
+		return
+	}
+
+	g, err := c.Guild()
+	if err != nil {
+		return
+	}
+
+	for _, voice := range g.VoiceStates {
+		if voice.ChannelID == c.ID {
+			m, err := g.GetMember(voice.UserID)
+			if err != nil {
+				continue
+			}
+
+			members = append(members, m)
+		}
+	}
+
+	return
 }
 
 // A ChannelEdit holds Channel Field data for a channel edit.
@@ -462,11 +501,11 @@ func (c *Channel) PermissionsFor(m *Member) (perms Permissions, err error) {
 func (c *Channel) SetPermissions(target IDGettable, overwrite *PermissionOverwrite) (err error) {
 	var permType string
 	switch target.(type) {
-	case User:
+	case *User:
 		permType = "member"
-	case Member:
+	case *Member:
 		permType = "member"
-	case Role:
+	case *Role:
 		permType = "role"
 	default:
 		err = ErrNotOverwriteSettable
@@ -505,11 +544,11 @@ func (c *Channel) ChangedRoles() (roles []*Role, err error) {
 func (c *Channel) OverwritesFor(target IDGettable) (overwrite *PermissionOverwrite, err error) {
 	var permType string
 	switch target.(type) {
-	case User:
+	case *User:
 		permType = "member"
-	case Member:
+	case *Member:
 		permType = "member"
-	case Role:
+	case *Role:
 		permType = "role"
 	default:
 		err = ErrNotOverwriteSettable
@@ -531,7 +570,7 @@ func (c *Channel) Delete() (err error) {
 }
 
 // CreateInvite creates an invite.
-// TODO: make a special object to create invites with
-func (c *Channel) CreateInvite(data Invite) (i *Invite, err error) {
+// data  : the InviteBuilder with data for the invite creation
+func (c *Channel) CreateInvite(data *InviteBuilder) (i *Invite, err error) {
 	return c.Session.ChannelInviteCreate(c.ID, data)
 }

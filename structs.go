@@ -82,6 +82,9 @@ type Session struct {
 	// The http client used for REST requests
 	Client *http.Client
 
+	// The user agent used for REST APIs
+	UserAgent string
+
 	// Stores the last HeartbeatAck that was recieved (in UTC)
 	LastHeartbeatAck time.Time
 
@@ -168,57 +171,6 @@ type ICEServer struct {
 	URL        string `json:"url"`
 	Username   string `json:"username"`
 	Credential string `json:"credential"`
-}
-
-// A Invite stores all data related to a specific Discord Guild or Channel invite.
-type Invite struct {
-	Guild     *Guild    `json:"guild"`
-	Channel   *Channel  `json:"channel"`
-	Inviter   *User     `json:"inviter"`
-	Code      string    `json:"code"`
-	CreatedAt Timestamp `json:"created_at"`
-	MaxAge    int       `json:"max_age"`
-	Uses      int       `json:"uses"`
-	MaxUses   int       `json:"max_uses"`
-	Revoked   bool      `json:"revoked"`
-	Temporary bool      `json:"temporary"`
-	Unique    bool      `json:"unique"`
-
-	TargetUser     *User `json:"target_user"`
-	TargetUserType int   `json:"target_user_type"`
-
-	// will only be filled when using InviteWithCounts
-	ApproximatePresenceCount int `json:"approximate_presence_count"`
-	ApproximateMemberCount   int `json:"approximate_member_count"`
-}
-
-func (i *Invite) build(s *Session) {
-	guild, GErr := s.State.Guild(i.Guild.ID)
-	if GErr == nil {
-		i.Guild = guild
-	} else {
-		i.Guild.Session = s
-	}
-
-	user, UErr := s.FetchUser(i.Inviter.ID)
-	if UErr == nil {
-		i.Inviter = user
-	} else {
-		i.Inviter.Session = s
-	}
-
-	channel, CErr := s.State.Channel(i.Channel.ID)
-	if CErr == nil {
-		i.Channel = channel
-	} else {
-		i.Channel.Session = s
-	}
-}
-
-// Delete deletes the invite
-func (i *Invite) Delete() (err error) {
-	_, err = i.Guild.DeleteInvite(i.Code)
-	return
 }
 
 // VerificationLevel type definition
@@ -465,7 +417,7 @@ const (
 	ErrCodeMissingAccess                             = 50001
 	ErrCodeInvalidAccountType                        = 50002
 	ErrCodeCannotExecuteActionOnDMChannel            = 50003
-	ErrCodeEmbedCisabled                             = 50004
+	ErrCodeEmbedDisabled                             = 50004
 	ErrCodeCannotEditFromAnotherUser                 = 50005
 	ErrCodeCannotSendEmptyMessage                    = 50006
 	ErrCodeCannotSendMessagesToThisUser              = 50007

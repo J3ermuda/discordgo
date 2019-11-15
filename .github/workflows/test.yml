@@ -1,0 +1,21 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: build
+        run: go build .
+      - name: test
+        run: go test .
+        env:
+          DG_GUILD: ${{ secrets.DG_GUILD }}
+          DG_CHANNEL: ${{ secrets.DG_CHANNEL }}
+          DG_ADMIN: ${{ secrets.DG_ADMIN }}
+          DG_ROLE: ${{ secrets.DG_ROLE }}
+          DG_ADMIN_ROLE: ${{ secrets.DG_ADMIN_ROLE }}
+          DG_TOKEN: ${{ secrets.DG_TOKEN }}
