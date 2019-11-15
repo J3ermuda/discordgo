@@ -183,7 +183,10 @@ func (m *MessageEdit) SetEmbed(embed *MessageEmbed) *MessageEdit {
 // Channel returns the channel object that the message was posted in,
 // this should only ever be nil right after a RESUME or the initial connection
 func (m *Message) Channel() *Channel {
-	c, _ := m.Session.State.Channel(m.ChannelID)
+	c, err := m.Session.State.Channel(m.ChannelID)
+	if err != nil {
+		m.Session.log(LogError, "Unable to get channel from state: %s", err)
+	}
 	return c
 }
 
