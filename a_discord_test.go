@@ -121,14 +121,26 @@ func TestOpenClose(t *testing.T) {
 		t.Fatalf("TestClose, d.Close failed: %+v", err)
 	}
 
+	if dg.State == nil {
+		t.Fatal("state is nil")
+	}
+
+	done := make(chan bool, 1)
+	f := dg.AddHandler(func(s *Session, _ *Ready) {
+		done <- true
+	})
+
 	err = dg.Open()
 	if err != nil {
 		t.Fatal("Opening of actual connection with discord failed")
 	}
 
-	if dg.State == nil {
-		t.Fatal("state is nil")
+	select {
+	case <-time.After(2000 * time.Millisecond):
+		t.Fatal("didn't receive ready")
+	case <-done:
 	}
+	f()
 }
 
 func TestAddHandler(t *testing.T) {
