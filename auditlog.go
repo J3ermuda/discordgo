@@ -114,6 +114,9 @@ const (
 	AuditLogActionMemberBanRemove  = 23
 	AuditLogActionMemberUpdate     = 24
 	AuditLogActionMemberRoleUpdate = 25
+	AuditLogActionMemberMove       = 26
+	AuditLogActionMemberDisconnect = 27
+	AuditLogActionBotAdd           = 28
 
 	AuditLogActionRoleCreate = 30
 	AuditLogActionRoleUpdate = 31
@@ -131,7 +134,14 @@ const (
 	AuditLogActionEmojiUpdate = 61
 	AuditLogActionEmojiDelete = 62
 
-	AuditLogActionMessageDelete = 72
+	AuditLogActionMessageDelete     = 72
+	AuditLogActionMessageBulkDelete = 73
+	AuditLogActionMessagePin        = 74
+	AuditLogActionMessageUnPin      = 75
+
+	AuditLogActionIntegrationCreate = 80
+	AuditLogActionIntegrationUpdate = 81
+	AuditLogActionIntegrationDelete = 82
 )
 
 // GetID returns the audit log entry's ID

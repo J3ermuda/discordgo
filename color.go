@@ -19,6 +19,7 @@ const (
 	ColorDarkGrey  = Color(0x607d8b)
 	ColorBlurple   = Color(0x7289da)
 	ColorGreyple   = Color(0x99aab5)
+	// TODO: add more, ex: white, black
 )
 
 // Color is a type around the int value of a discord color

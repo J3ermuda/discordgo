@@ -84,3 +84,37 @@ func TestHistoryIterator_Reverse(t *testing.T) {
 		t.Fatal("message order not reversed")
 	}
 }
+
+func TestHistoryIterator_SetLimit(t *testing.T) {
+	if envChannel == "" {
+		t.Skip("Skipping, DG_CHANNEL not set.")
+	}
+
+	if envGuild == "" {
+		t.Skip("Skipping, DG_GUILD not set.")
+	}
+
+	if dg == nil {
+		t.Skip("Skipping, dg not set.")
+	}
+
+	g, err := dg.State.Guild(envGuild)
+	if err != nil {
+		t.Fatalf("Guild not found, id: %s; %s", envGuild, err)
+	}
+
+	c, err := g.GetChannel(envChannel)
+	if err != nil || c == nil {
+		t.Fatalf("Channel %s wasn't cached", envChannel)
+	}
+
+	iterator := c.GetHistoryIterator().SetLimit(110)
+	messages := make([]*Message, 0, 110)
+	for m := range iterator.Iter() {
+		messages = append(messages, m)
+	}
+
+	if len(messages) != 110 {
+		t.Fatal("iterator does not return 110 messages")
+	}
+}
