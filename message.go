@@ -119,7 +119,7 @@ type Message struct {
 	// The flags of the message, which describe extra features of a message.
 	// This is a combination of bit masks; the presence of a certain permission can
 	// be checked by performing a bitwise AND between this int and the flag.
-	Flags int `json:"flags"`
+	Flags MessageFlag `json:"flags"`
 
 	// The Session to call the API and retrieve other objects
 	Session *Session `json:"-"`
@@ -149,8 +149,16 @@ type MessageSend struct {
 // MessageEdit is used to chain parameters via ChannelMessageEditComplex, which
 // is also where you should get the instance from.
 type MessageEdit struct {
-	Content *string       `json:"content,omitempty"`
-	Embed   *MessageEmbed `json:"embed,omitempty"`
+	// The content of the message.
+	Content *string `json:"content,omitempty"`
+
+	// The embed attached to the message
+	Embed *MessageEmbed `json:"embed,omitempty"`
+
+	// The flags of the message, which describe extra features of a message.
+	// This is a combination of bit masks; the presence of a certain permission can
+	// be checked by performing a bitwise AND between this int and the flag. C
+	Flags MessageFlag `json:"flags"`
 
 	ID      string
 	Channel string
@@ -195,6 +203,12 @@ func (m *MessageEdit) SetContent(str string) *MessageEdit {
 // so you can chain commands.
 func (m *MessageEdit) SetEmbed(embed *MessageEmbed) *MessageEdit {
 	m.Embed = embed
+	return m
+}
+
+// ToggleEmbedSuppression toggles if the embeds in the message have been suppressed or not
+func (m *MessageEdit) ToggleEmbedSuppression() *MessageEdit {
+	m.Flags = m.Flags ^ MessageFlagSuppressEmbeds
 	return m
 }
 
@@ -276,7 +290,7 @@ type MessageFlag int
 // Constants for the different bit offsets of Message Flags
 const (
 	// This message has been published to subscribed channels (via Channel Following)
-	MessageFlagCrossposted = 1 << iota
+	MessageFlagCrossposted MessageFlag = 1 << iota
 	// This message originated from a message in another channel (via Channel Following)
 	MessageFlagIsCrosspost
 	// Do not include any embeds when serializing this message

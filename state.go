@@ -901,6 +901,8 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		if s.TrackMembers {
 			err = s.MemberRemove(t.Member)
 		}
+
+		t.Member.User.Session = se
 	case *GuildMembersChunk:
 		if s.TrackMembers {
 			for i := range t.Members {
@@ -993,6 +995,7 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		if s.MaxMessageCount != 0 {
 			err = s.MessageRemove(t.Message)
 		}
+		t.Session = se
 	case *MessageDeleteBulk:
 		if s.MaxMessageCount != 0 {
 			for _, mID := range t.Messages {
