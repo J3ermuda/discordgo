@@ -162,6 +162,7 @@ type MessageEdit struct {
 
 	ID      string
 	Channel string
+	message *Message
 }
 
 // GetID returns the ID of the message
@@ -189,6 +190,7 @@ func (m *Message) NewMessageEdit() *MessageEdit {
 	return &MessageEdit{
 		Channel: m.ChannelID,
 		ID:      m.ID,
+		message: m,
 	}
 }
 
@@ -208,8 +210,19 @@ func (m *MessageEdit) SetEmbed(embed *MessageEmbed) *MessageEdit {
 
 // ToggleEmbedSuppression toggles if the embeds in the message have been suppressed or not
 func (m *MessageEdit) ToggleEmbedSuppression() *MessageEdit {
-	m.Flags = m.Flags ^ MessageFlagSuppressEmbeds
+	m.Flags ^= MessageFlagSuppressEmbeds
 	return m
+}
+
+// Edit takes the MessageEdit and edits the message,
+// this only works when the MessageEdit was created with Message.NewMessageEdit()
+func (m *MessageEdit) Edit() (res *Message, err error) {
+	if m.message == nil {
+		err = ErrObjectNotFound
+		return
+	}
+
+	return m.message.Edit(m)
 }
 
 // Channel returns the channel object that the message was posted in,
