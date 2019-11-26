@@ -294,8 +294,19 @@ func (g *Guild) GetVoiceState(userID string) (voice *VoiceState, err error) {
 		}
 	}
 
-	err = ErrObjectNotFound
-	return
+	return nil, ErrObjectNotFound
+}
+
+// GetPresence returns the Presence of the member with the given userID
+// userID  : userID of the member whose Presence should be returned
+func (g *Guild) GetPresence(userID string) (presence *Presence, err error) {
+	for _, presence = range g.Presences {
+		if presence.User.ID == userID {
+			return presence, nil
+		}
+	}
+
+	return nil, ErrObjectNotFound
 }
 
 // NewEdit creates a new GuildParams to chain an edit with
@@ -411,8 +422,8 @@ func (g *Guild) AuditLogs(userID, beforeID string, actionType, limit int) (log *
 }
 
 // CreateRole creates and then returns a new Guild Role.
-func (g *Guild) CreateRole() (role *Role, err error) {
-	return g.Session.GuildRoleCreate(g.ID)
+func (g *Guild) CreateRole(settings *RoleSettings) (role *Role, err error) {
+	return g.Session.GuildRoleCreate(g.ID, settings)
 }
 
 // CreateChannel creates and returns a new channel in the guild

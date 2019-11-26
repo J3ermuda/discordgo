@@ -55,6 +55,7 @@ type ChannelCreate struct {
 // ChannelUpdate is the data for a ChannelUpdate event.
 type ChannelUpdate struct {
 	*Channel
+	BeforeUpdate *Channel `json:"-"`
 }
 
 // ChannelDelete is the data for a ChannelDelete event.
@@ -77,6 +78,7 @@ type GuildCreate struct {
 // GuildUpdate is the data for a GuildUpdate event.
 type GuildUpdate struct {
 	*Guild
+	BeforeUpdate *Guild `json:"-"`
 }
 
 // GuildDelete is the data for a GuildDelete event.
@@ -104,6 +106,7 @@ type GuildMemberAdd struct {
 // GuildMemberUpdate is the data for a GuildMemberUpdate event.
 type GuildMemberUpdate struct {
 	*Member
+	BeforeUpdate *Member `json:"-"`
 }
 
 // GuildMemberRemove is the data for a GuildMemberRemove event.
@@ -119,6 +122,7 @@ type GuildRoleCreate struct {
 // GuildRoleUpdate is the data for a GuildRoleUpdate event.
 type GuildRoleUpdate struct {
 	*GuildRole
+	BeforeUpdate *Role `json:"-"`
 }
 
 // A GuildRoleDelete is the data for a GuildRoleDelete event.
@@ -188,8 +192,9 @@ type PresencesReplace []*Presence
 // PresenceUpdate is the data for a PresenceUpdate event.
 type PresenceUpdate struct {
 	Presence
-	GuildID string   `json:"guild_id"`
-	Roles   []string `json:"roles"`
+	GuildID      string    `json:"guild_id"`
+	Roles        []string  `json:"roles"`
+	BeforeUpdate *Presence `json:"-"`
 }
 
 // Resumed is the data for a Resumed event.
@@ -208,6 +213,7 @@ type TypingStart struct {
 // UserUpdate is the data for a UserUpdate event.
 type UserUpdate struct {
 	*User
+	BeforeUpdate *User `json:"-"`
 }
 
 // UserNoteUpdate is the data for a UserNoteUpdate event.
@@ -226,6 +232,7 @@ type VoiceServerUpdate struct {
 // VoiceStateUpdate is the data for a VoiceStateUpdate event.
 type VoiceStateUpdate struct {
 	*VoiceState
+	BeforeUpdate *VoiceState `json:"-"`
 }
 
 // MessageDeleteBulk is the data for a MessageDeleteBulk event

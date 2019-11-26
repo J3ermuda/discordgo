@@ -43,19 +43,19 @@ type Role struct {
 	Session *Session `json:"-"`
 }
 
-// A RoleEdit stores information used to edit a Role
-type RoleEdit struct {
+// A RoleSettings stores information used to edit or create a Role
+type RoleSettings struct {
 	// The role's name (overwrites existing)
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// The color the role should have (as a decimal, not hex)
-	Color Color `json:"color"`
+	Color Color `json:"color,omitempty"`
 
 	// Whether to display the role's users separately (overwrites existing)
 	Hoist bool `json:"hoist"`
 
 	// The overall permissions number of the role (overwrites existing)
-	Permissions Permissions `json:"permissions"`
+	Permissions Permissions `json:"permissions,omitempty"`
 
 	// Whether this role is mentionable (overwrites existing)
 	Mentionable bool `json:"mentionable"`
@@ -118,9 +118,9 @@ func (r *Role) GetMembers() (members []*Member, err error) {
 	return
 }
 
-// NewEdit creates a new RoleEdit to chain an edit with
-func (r *Role) NewEdit() *RoleEdit {
-	return &RoleEdit{
+// NewEdit creates a new RoleSettings to chain an edit with
+func (r *Role) NewEdit() *RoleSettings {
+	return &RoleSettings{
 		Name:        r.Name,
 		Color:       r.Color,
 		Hoist:       r.Hoist,
@@ -130,43 +130,43 @@ func (r *Role) NewEdit() *RoleEdit {
 }
 
 // SetName can be used to set the role name in a chain
-func (r *RoleEdit) SetName(name string) *RoleEdit {
+func (r *RoleSettings) SetName(name string) *RoleSettings {
 	r.Name = name
 	return r
 }
 
 // SetColor can be used to set the role color in a chain
-func (r *RoleEdit) SetColor(color Color) *RoleEdit {
+func (r *RoleSettings) SetColor(color Color) *RoleSettings {
 	r.Color = color
 	return r
 }
 
 // IsHoisted can be used to set the role to being hoisted in a chain
-func (r *RoleEdit) IsHoisted() *RoleEdit {
+func (r *RoleSettings) IsHoisted() *RoleSettings {
 	r.Hoist = true
 	return r
 }
 
 // IsNotHoisted can be used to set the role to not be hoisted in a chain
-func (r *RoleEdit) IsNotHoisted() *RoleEdit {
+func (r *RoleSettings) IsNotHoisted() *RoleSettings {
 	r.Hoist = false
 	return r
 }
 
 // SetPermissions can be used to set the role permissions in a chain
-func (r *RoleEdit) SetPermissions(perms Permissions) *RoleEdit {
+func (r *RoleSettings) SetPermissions(perms Permissions) *RoleSettings {
 	r.Permissions = perms
 	return r
 }
 
 // IsMentionable can be used to set the role to being mentionable in a chain
-func (r *RoleEdit) IsMentionable() *RoleEdit {
+func (r *RoleSettings) IsMentionable() *RoleSettings {
 	r.Mentionable = true
 	return r
 }
 
 // IsNotMentionable can be used to set the role to not be mentionable in a chain
-func (r *RoleEdit) IsNotMentionable() *RoleEdit {
+func (r *RoleSettings) IsNotMentionable() *RoleSettings {
 	r.Mentionable = false
 	return r
 }
@@ -183,7 +183,7 @@ func (r *Role) Edit(name string, color Color, hoist bool, perm Permissions, ment
 
 // EditComplex updates the Role with new values
 // data      : data to send to the API
-func (r *Role) EditComplex(data *RoleEdit) (edited *Role, err error) {
+func (r *Role) EditComplex(data *RoleSettings) (edited *Role, err error) {
 	return r.Session.GuildRoleEditComplex(r.Guild.ID, r.ID, data)
 }
 
@@ -217,7 +217,7 @@ func (r *Role) Move(position int) (err error) {
 		editedRoles = append(editedRoles, r)
 	}
 
-	for p, i := min, 0; p <= max && i < len(editedRoles); p, i = p+1, i+1 {
+	for p, i := min, 0; p <= max+1 && i < len(editedRoles); p, i = p+1, i+1 {
 		editedRoles[i].Position = p
 		edits = append(edits, &RoleMove{editedRoles[i].ID, editedRoles[i].Position})
 	}

@@ -872,9 +872,9 @@ func (s *Session) GuildRoles(guildID string) (st []*Role, err error) {
 
 // GuildRoleCreate returns a new Guild Role.
 // guildID: The ID of a Guild.
-func (s *Session) GuildRoleCreate(guildID string) (st *Role, err error) {
+func (s *Session) GuildRoleCreate(guildID string, settings *RoleSettings) (st *Role, err error) {
 
-	body, err := s.RequestWithBucketID("POST", EndpointGuildRoles(guildID), nil, EndpointGuildRoles(guildID))
+	body, err := s.RequestWithBucketID("POST", EndpointGuildRoles(guildID), settings, EndpointGuildRoles(guildID))
 	if err != nil {
 		return
 	}
@@ -903,7 +903,7 @@ func (s *Session) GuildRoleCreate(guildID string) (st *Role, err error) {
 // perm      : The permissions for the role.
 // mention   : Whether this role is mentionable
 func (s *Session) GuildRoleEdit(guildID, roleID, name string, color Color, hoist bool, perm Permissions, mention bool) (st *Role, err error) {
-	data := &RoleEdit{name, color, hoist, perm, mention}
+	data := &RoleSettings{name, color, hoist, perm, mention}
 
 	return s.GuildRoleEditComplex(guildID, roleID, data)
 }
@@ -912,7 +912,7 @@ func (s *Session) GuildRoleEdit(guildID, roleID, name string, color Color, hoist
 // guildID   : The ID of a Guild.
 // roleID    : The ID of a Role.
 // data      : data to send to the API
-func (s *Session) GuildRoleEditComplex(guildID, roleID string, data *RoleEdit) (st *Role, err error) {
+func (s *Session) GuildRoleEditComplex(guildID, roleID string, data *RoleSettings) (st *Role, err error) {
 	// Prevent sending a color int that is too big.
 	if data.Color > 0xFFFFFF {
 		err = fmt.Errorf("color value cannot be larger than 0xFFFFFF")
