@@ -1,6 +1,10 @@
 package discordgo
 
-import "testing"
+import (
+	"log"
+	"testing"
+	"time"
+)
 
 func getGuild(t *testing.T) (g *Guild) {
 	if envGuild == "" {
@@ -43,12 +47,12 @@ func TestGuild_GetRole(t *testing.T) {
 func TestGuild_CreateDeleteRole(t *testing.T) {
 	g := getGuild(t)
 
-	r, err := g.CreateRole()
+	r, err := g.CreateRole(&RoleSettings{})
 	if err != nil {
 		t.Fatalf("Role failed to create in Guild; %s", err)
 	}
 
-	editData := &RoleEdit{
+	editData := &RoleSettings{
 		Name:        "OwO a testing role",
 		Hoist:       false,
 		Color:       ColorGreen,
@@ -70,7 +74,7 @@ func TestGuild_CreateDeleteRole(t *testing.T) {
 func TestRole_Move(t *testing.T) {
 	g := getGuild(t)
 
-	r, err := g.CreateRole()
+	r, err := g.CreateRole(&RoleSettings{})
 	if err != nil {
 		t.Fatalf("Role failed to create in Guild; %s", err)
 	}
@@ -81,7 +85,7 @@ func TestRole_Move(t *testing.T) {
 		t.Fatalf("failed at parsing hex code; %s", err)
 	}
 
-	editData := &RoleEdit{
+	editData := &RoleSettings{
 		Name:        "OwO a moving role",
 		Hoist:       false,
 		Color:       c,
@@ -94,8 +98,34 @@ func TestRole_Move(t *testing.T) {
 		t.Fatalf("Failed at editing role; %s", err)
 	}
 
+	done := make(chan bool, 1)
+	println(r.ID)
+	testRoleUpdateHandler := func(se *Session, role *GuildRoleUpdate) {
+		log.Println(role.Role.ID, role.BeforeUpdate.ID, role.Role.Position, role.BeforeUpdate.Position)
+
+		if r.ID == role.Role.ID && role.Role.Position != role.BeforeUpdate.Position && role.Role.Position == 6 {
+			done <- true
+		}
+	}
+	rf := dg.AddHandler(testRoleUpdateHandler)
+
 	err = r.Move(6)
 	if err != nil {
+		rf()
 		t.Fatalf("failed at moving role; %s", err)
+	}
+
+	select {
+	case <-time.After(2000 * time.Millisecond):
+		rf()
+		t.Fatal("the role handler wasn't called or the position wasn't changed")
+	case <-done:
+	}
+
+	rf()
+
+	err = r.Delete()
+	if err != nil {
+		t.Fatalf("Failed at deleteing role; %s", err)
 	}
 }

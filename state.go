@@ -870,6 +870,12 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 	case *GuildCreate:
 		err = s.GuildAdd(t.Guild, se)
 	case *GuildUpdate:
+		oldGuild, err := s.Guild(t.ID)
+		if err == nil {
+			oldCopy := *oldGuild
+			t.BeforeUpdate = &oldCopy
+		}
+
 		err = s.GuildAdd(t.Guild, se)
 	case *GuildDelete:
 		err = s.GuildRemove(t.Guild)
@@ -887,6 +893,12 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		}
 	case *GuildMemberUpdate:
 		if s.TrackMembers {
+			oldMember, err := s.Member(t.GuildID, t.GetID())
+			if err == nil {
+				oldCopy := *oldMember
+				t.BeforeUpdate = &oldCopy
+			}
+
 			err = s.MemberAdd(t.Member, se)
 		}
 	case *GuildMemberRemove:
@@ -914,6 +926,7 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		t.Role.Session = se
 		g, _ := se.State.Guild(t.GuildID)
 		t.Role.Guild = g
+
 		if s.TrackRoles {
 			err = s.RoleAdd(t.GuildID, t.Role)
 		}
@@ -921,7 +934,14 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		t.Role.Session = se
 		g, _ := se.State.Guild(t.GuildID)
 		t.Role.Guild = g
+
 		if s.TrackRoles {
+			oldRole, err := g.GetRole(t.Role.ID)
+			if err == nil {
+				oldCopy := *oldRole
+				t.BeforeUpdate = &oldCopy
+			}
+
 			err = s.RoleAdd(t.GuildID, t.Role)
 		}
 	case *GuildRoleDelete:
@@ -945,6 +965,12 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 	case *ChannelUpdate:
 		t.Channel.Session = se
 		if s.TrackChannels {
+			oldChannel, err := s.Channel(t.ID)
+			if err == nil {
+				oldCopy := *oldChannel
+				t.BeforeUpdate = &oldCopy
+			}
+
 			err = s.ChannelAdd(t.Channel)
 		}
 	case *ChannelDelete:
@@ -999,16 +1025,34 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 	case *MessageDeleteBulk:
 		if s.MaxMessageCount != 0 {
 			for _, mID := range t.Messages {
-				s.messageRemoveByID(t.ChannelID, mID)
+				_ = s.messageRemoveByID(t.ChannelID, mID)
 			}
 		}
 	case *VoiceStateUpdate:
 		if s.TrackVoice {
+			g, err := s.Guild(t.GuildID)
+			if err == nil {
+				oldState, err := g.GetVoiceState(t.UserID)
+				if err == nil {
+					oldCopy := *oldState
+					t.BeforeUpdate = &oldCopy
+				}
+			}
+
 			err = s.voiceStateUpdate(t)
 		}
 	case *PresenceUpdate:
 		if s.TrackPresences {
-			s.PresenceAdd(t.GuildID, &t.Presence)
+			g, err := s.Guild(t.GuildID)
+			if err == nil {
+				oldPresence, err := g.GetPresence(t.User.ID)
+				if err == nil {
+					oldCopy := *oldPresence
+					t.BeforeUpdate = &oldCopy
+				}
+
+				_ = s.PresenceAdd(g.ID, &t.Presence)
+			}
 		}
 		if s.TrackMembers {
 			if t.Status == StatusOffline {
@@ -1049,7 +1093,14 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 
 	case *MessageReactionAdd:
 		t.Session = se
-
+	case *UserUpdate:
+		t.Session = se
+		oldUser, err := s.GetUser(t.ID)
+		if err == nil {
+			oldCopy := *oldUser
+			t.BeforeUpdate = &oldCopy
+			*oldUser = *t.User
+		}
 	}
 
 	return

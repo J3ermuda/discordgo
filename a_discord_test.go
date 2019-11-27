@@ -240,8 +240,13 @@ func TestHandlerSessionInserter(t *testing.T) {
 	}
 
 	testMessageUpdateHandler := func(s *Session, m *MessageUpdate) {
-		_ = m.AddReaction(&Emoji{Name: "❤"})
-		done <- true
+		if m.BeforeUpdate == nil {
+			_ = m.AddReaction(&Emoji{Name: "❤"})
+			done <- true
+		} else if m.BeforeUpdate.Content != m.Content {
+			_ = m.AddReaction(&Emoji{Name: "❤"})
+			done <- true
+		}
 	}
 
 	r := dg.AddHandler(testChannelHandler)
@@ -251,11 +256,16 @@ func TestHandlerSessionInserter(t *testing.T) {
 	_, err = g.CreateChannel("TestChannel", ChannelTypeGuildText)
 	if err != nil {
 		r()
-		return
+		m()
+		u()
+		t.Fatal("creating TestChannel failed")
 	}
 
 	select {
 	case <-time.After(2000 * time.Millisecond):
+		r()
+		m()
+		u()
 		t.Fatal("the handlers weren't called")
 	case <-done:
 	}

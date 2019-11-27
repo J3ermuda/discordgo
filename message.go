@@ -294,7 +294,7 @@ type MessageActivityType int
 
 // Constants for the different types of Message Activity
 const (
-	MessageActivityTypeJoin = iota + 1
+	MessageActivityTypeJoin MessageActivityType = iota + 1
 	MessageActivityTypeSpectate
 	MessageActivityTypeListen
 	MessageActivityTypeJoinRequest
