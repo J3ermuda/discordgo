@@ -29,8 +29,6 @@ type EventInterfaceProvider interface {
 	New() interface{}
 }
 
-var natsSubscriptions map[string]*nats.Subscription = make(map[string]*nats.Subscription)
-
 // interfaceEventType is the event handler type for interface{} events.
 const interfaceEventType = "__INTERFACE__"
 
@@ -138,14 +136,14 @@ func (s *Session) AddHandler(handler interface{}) func() {
 		if subject == interfaceEventType {
 			subject = "*"
 		}
-		if _, ok := natsSubscriptions[subject]; !ok {
+		if _, ok := s.natsSubs[subject]; !ok {
 			s.log(LogInformational, "Subscribing to NATS event: %s", subject)
 			sub, err := s.NATS.QueueSubscribe(subject, s.NatsQueueName, s.natsHandler)
 			if err != nil {
 				s.log(LogError, "Could not subscribe to NATS event: %s", err)
-				natsSubscriptions[subject] = sub
+				s.natsSubs[subject] = sub
 			}
-			s.log(LogInformational, "%v", natsSubscriptions)
+			s.log(LogInformational, "%v", s.natsSubs)
 		}
 	}
 

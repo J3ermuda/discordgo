@@ -100,6 +100,9 @@ type Session struct {
 	// NATS client for sending and/or receiving NATS events
 	NATS *nats.Conn
 
+	// Holds the NATS subscriptions
+	natsSubs map[string]*nats.Subscription
+
 	// 0 = Send, 1 = Receive
 	NatsMode uint
 

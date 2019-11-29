@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"github.com/nats-io/nats.go"
 )
 
 // VERSION of DiscordGo, follows Semantic Versioning. (http://semver.org/)
@@ -41,6 +42,7 @@ func New(args ...interface{}) (s *Session, err error) {
 		UserAgent:              "DiscordBot (https://github.com/bwmarrin/discordgo, v" + VERSION + ")",
 		sequence:               new(int64),
 		LastHeartbeatAck:       time.Now().UTC(),
+		natsSubs: 				make(map[string]*nats.Subscription),
 	}
 
 	// If no arguments are passed return the empty Session interface.
