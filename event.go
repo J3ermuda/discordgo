@@ -29,7 +29,7 @@ type EventInterfaceProvider interface {
 	New() interface{}
 }
 
-var natsSubscriptions map[string]nats.Subscription = make(map[string]nats.Subscription)
+var natsSubscriptions map[string]*nats.Subscription = make(map[string]*nats.Subscription)
 
 // interfaceEventType is the event handler type for interface{} events.
 const interfaceEventType = "__INTERFACE__"
