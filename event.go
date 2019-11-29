@@ -142,6 +142,7 @@ func (s *Session) AddHandler(handler interface{}) func() {
 			s.log(LogInformational, "Subscribing to NATS event: %s", subject)
 			sub, err := s.NATS.QueueSubscribe(subject, s.NatsQueueName, s.natsHandler)
 			if err != nil {
+				s.log(LogError, "Could not subscribe to NATS event: %s", err)
 				natsSubscriptions[subject] = sub
 			}
 		}
