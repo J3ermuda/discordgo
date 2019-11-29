@@ -145,7 +145,7 @@ func (s *Session) AddHandler(handler interface{}) func() {
 				s.log(LogError, "Could not subscribe to NATS event: %s", err)
 				natsSubscriptions[subject] = sub
 			}
-			s.log(LogInformational, natsSubscriptions)
+			s.log(LogInformational, "%v", natsSubscriptions)
 		}
 	}
 
