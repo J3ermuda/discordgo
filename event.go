@@ -144,7 +144,6 @@ func (s *Session) AddHandler(handler interface{}) func() {
 			} else {
 				s.natsSubs[subject] = sub
 			}
-			s.log(LogInformational, "%v", s.natsSubs)
 		}
 	}
 
