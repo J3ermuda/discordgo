@@ -946,6 +946,14 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		}
 	case *GuildRoleDelete:
 		if s.TrackRoles {
+			g, err := s.Guild(t.GuildID)
+			if err == nil {
+				r, err := g.GetRole(t.RoleID)
+				if err == nil {
+					t.Role = r
+				}
+			}
+
 			err = s.RoleRemove(t.GuildID, t.RoleID)
 		}
 	case *GuildEmojisUpdate:

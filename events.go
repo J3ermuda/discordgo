@@ -129,6 +129,7 @@ type GuildRoleUpdate struct {
 type GuildRoleDelete struct {
 	RoleID  string `json:"role_id"`
 	GuildID string `json:"guild_id"`
+	Role    *Role  `json:"-"`
 }
 
 // A GuildEmojisUpdate is the data for a guild emoji update event.
