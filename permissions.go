@@ -125,6 +125,42 @@ func (p *Permissions) Set(perm PermissionOffset, value bool) {
 	}
 }
 
+// ToMap converts the Permissions to a key-value based representation
+func (p *Permissions) ToMap() map[string]bool {
+	return map[string]bool{
+		"ReadMessages":       p.Has(PermissionReadMessages),
+		"SendMessages":       p.Has(PermissionSendMessages),
+		"SendTTSMessages":    p.Has(PermissionSendTTSMessages),
+		"ManageMessages":     p.Has(PermissionManageMessages),
+		"EmbedLinks":         p.Has(PermissionEmbedLinks),
+		"AttachFiles":        p.Has(PermissionAttachFiles),
+		"ReadMessageHistory": p.Has(PermissionReadMessageHistory),
+		"MentionEveryone":    p.Has(PermissionMentionEveryone),
+		"UseExternalEmojis":  p.Has(PermissionUseExternalEmojis),
+
+		"VoiceSpeak":           p.Has(PermissionVoiceSpeak),
+		"VoiceMuteMembers":     p.Has(PermissionVoiceMuteMembers),
+		"VoiceDeafenMembers":   p.Has(PermissionVoiceDeafenMembers),
+		"VoiceMoveMembers":     p.Has(PermissionVoiceMoveMembers),
+		"VoiceUseVAD":          p.Has(PermissionVoiceUseVAD),
+		"VoicePrioritySpeaker": p.Has(PermissionVoicePrioritySpeaker),
+
+		"CreateInstantInvite": p.Has(PermissionCreateInstantInvite),
+		"ManageChannels":      p.Has(PermissionManageChannels),
+		"AddReactions":        p.Has(PermissionAddReactions),
+		"ManageRoles":         p.Has(PermissionManageRoles),
+
+		"KickMembers":     p.Has(PermissionKickMembers),
+		"BanMembers":      p.Has(PermissionBanMembers),
+		"ManageServer":    p.Has(PermissionManageServer),
+		"Administrator":   p.Has(PermissionAdministrator),
+		"ManageWebhooks":  p.Has(PermissionManageWebhooks),
+		"ManageEmojis":    p.Has(PermissionManageEmojis),
+		"ManageNicknames": p.Has(PermissionManageNicknames),
+		"ChangeNickname":  p.Has(PermissionChangeNickname),
+	}
+}
+
 // A PermissionOverwrite holds permission overwrite data for a Channel
 type PermissionOverwrite struct {
 	ID    string      `json:"id"`
@@ -159,6 +195,33 @@ func (p *PermissionOverwrite) Set(perm PermissionOffset, value *bool) {
 	} else {
 		p.Deny.Set(perm, true)
 		p.Allow.Set(perm, false)
+	}
+}
+
+// ToMap converts the PermissionOverwrite to a key-value based representation of the overwrite
+func (p *PermissionOverwrite) ToMap() map[string]*bool {
+	return map[string]*bool{
+		"ReadMessages":       p.Has(PermissionReadMessages),
+		"SendMessages":       p.Has(PermissionSendMessages),
+		"SendTTSMessages":    p.Has(PermissionSendTTSMessages),
+		"ManageMessages":     p.Has(PermissionManageMessages),
+		"EmbedLinks":         p.Has(PermissionEmbedLinks),
+		"AttachFiles":        p.Has(PermissionAttachFiles),
+		"ReadMessageHistory": p.Has(PermissionReadMessageHistory),
+		"MentionEveryone":    p.Has(PermissionMentionEveryone),
+		"UseExternalEmojis":  p.Has(PermissionUseExternalEmojis),
+
+		"VoiceSpeak":           p.Has(PermissionVoiceSpeak),
+		"VoiceMuteMembers":     p.Has(PermissionVoiceMuteMembers),
+		"VoiceDeafenMembers":   p.Has(PermissionVoiceDeafenMembers),
+		"VoiceMoveMembers":     p.Has(PermissionVoiceMoveMembers),
+		"VoiceUseVAD":          p.Has(PermissionVoiceUseVAD),
+		"VoicePrioritySpeaker": p.Has(PermissionVoicePrioritySpeaker),
+
+		"CreateInstantInvite": p.Has(PermissionCreateInstantInvite),
+		"ManageChannels":      p.Has(PermissionManageChannels),
+		"AddReactions":        p.Has(PermissionAddReactions),
+		"ManageRoles":         p.Has(PermissionManageRoles),
 	}
 }
 
