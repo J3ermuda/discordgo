@@ -240,13 +240,8 @@ func TestHandlerSessionInserter(t *testing.T) {
 	}
 
 	testMessageUpdateHandler := func(s *Session, m *MessageUpdate) {
-		if m.BeforeUpdate == nil {
-			_ = m.AddReaction(&Emoji{Name: "❤"})
-			done <- true
-		} else if m.BeforeUpdate.Content != m.Content {
-			_ = m.AddReaction(&Emoji{Name: "❤"})
-			done <- true
-		}
+		_ = m.AddReaction(&Emoji{Name: "❤"})
+		done <- true
 	}
 
 	r := dg.AddHandler(testChannelHandler)
