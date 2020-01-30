@@ -33,7 +33,7 @@ type Member struct {
 	PremiumSince Timestamp `json:"premium_since"`
 
 	// Guild gets set when GetGuild gets called for the first time as an optimisation technique
-	guild *Guild `json:"-"`
+	guild *Guild
 }
 
 // String returns a unique identifier of the form displayName#discriminator
