@@ -1,8 +1,6 @@
 package discordgo
 
 import (
-	"encoding/json"
-	nats "github.com/nats-io/nats.go"
 	"runtime/debug"
 )
 
@@ -131,15 +129,6 @@ func (s *Session) AddHandler(handler interface{}) func() {
 		return func() {}
 	}
 
-	if s.NATS != nil && s.NatsMode == 1 {
-		subject := eh.Type()
-		if subject == interfaceEventType {
-			subject = "*"
-		}
-		s.log(LogInformational, "Subscribing to NATS event: %s", subject)
-		s.NATS.QueueSubscribe(subject, s.NatsQueueName, s.natsHandler)
-	}
-
 	return s.addEventHandler(eh)
 }
 
@@ -215,18 +204,6 @@ func (s *Session) handlePanic(t string) {
 	s.log(1, "panic happened in event: %s, panic returned: %s", t, p)
 	if s.LogLevel >= 1 {
 		debug.PrintStack()
-	}
-}
-
-// Handles events coming in from NATS
-func (s *Session) natsHandler(m *nats.Msg) {
-	if eh, ok := registeredInterfaceProviders[m.Subject]; ok {
-		i := eh.New()
-		// Attempt to unmarshal our event.
-		if err := json.Unmarshal(m.Data, i); err != nil {
-			s.log(LogError, "error unmarshalling %s event, %s", m.Subject, err)
-		}
-		s.handleEvent(m.Subject, i)
 	}
 }
 

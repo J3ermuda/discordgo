@@ -38,10 +38,6 @@ type resumePacket struct {
 func (s *Session) Open() error {
 	s.log(LogInformational, "called")
 
-	if s.NATS != nil && s.NatsMode == 1 {
-		return nil
-	}
-
 	var err error
 
 	// Prevent Open or other major Session functions from
@@ -542,15 +538,6 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 			s.log(LogError, "error unmarshalling %s event, %s", e.Type, err)
 		}
 
-		// If NATS outgoing is enabled, dispatch to NATS
-		if s.NATS != nil && s.NatsMode == 0 {
-			data, err := e.RawData.MarshalJSON()
-			if err == nil {
-				s.log(LogInformational, "dispatching event to NATS: %s", e.Type)
-				s.NATS.Publish(e.Type, data)
-			}
-		}
-
 		// Send event to any registered event handlers for it's type.
 		// Because the above doesn't cancel this, in case of an error
 		// the struct could be partially populated or at default values.
@@ -736,6 +723,7 @@ type identifyData struct {
 	LargeThreshold int                `json:"large_threshold"`
 	Compress       bool               `json:"compress"`
 	Shard          *[2]int            `json:"shard,omitempty"`
+	Intents        Intent             `json:"intents,omitempty"`
 }
 
 type identifyOp struct {
@@ -758,6 +746,7 @@ func (s *Session) identify() error {
 		250,
 		s.Compress,
 		nil,
+		s.Intents,
 	}
 
 	if s.ShardCount > 1 {
@@ -770,7 +759,7 @@ func (s *Session) identify() error {
 	}
 
 	op := identifyOp{2, data}
-
+	s.log(LogDebug, "sending identify packet: %v", op)
 	s.wsMutex.Lock()
 	err := s.wsConn.WriteJSON(op)
 	s.wsMutex.Unlock()
