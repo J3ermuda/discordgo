@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	nats "github.com/nats-io/nats.go"
 )
 
 // A Session represents a connection to the Discord API.
@@ -91,20 +90,14 @@ type Session struct {
 	// Stores the last Heartbeat sent (in UTC)
 	LastHeartbeatSent time.Time
 
+	// Intents to send to Discord
+	Intents Intent
+
 	// used to deal with rate limits
 	Ratelimiter *RateLimiter
 
 	// Represents a cache for the REST API
 	RESTCache RestCache
-
-	// NATS client for sending and/or receiving NATS events
-	NATS *nats.Conn
-
-	// 0 = Send, 1 = Receive
-	NatsMode uint
-
-	// Name of the NATS queue to listen on (usually the name of your microservice)
-	NatsQueueName string
 
 	// Event handlers
 	handlersMu   sync.RWMutex
@@ -193,6 +186,28 @@ const (
 	ExplicitContentFilterDisabled ExplicitContentFilterLevel = iota
 	ExplicitContentFilterMembersWithoutRoles
 	ExplicitContentFilterAllMembers
+)
+
+// Intent type definition
+type Intent int
+
+// Constants for Intents
+const (
+	IntentGuilds Intent = 1 << iota
+	IntentGuildMembers
+	IntentGuildBans
+	IntentGuildEmojis
+	IntentGuildIntegrations
+	IntentGuildWebhooks
+	IntentGuildInvites
+	IntentGuildVoiceStates
+	IntentGuildPresences
+	IntentGuildMessages
+	IntentGuildMessageReactions
+	IntentGuildMessageTyping
+	IntentDirectMessages
+	IntentDirectMessageReactions
+	IntentMessageTyping
 )
 
 // MfaLevel type definition
