@@ -181,22 +181,38 @@ func (s *Session) removeEventHandlerInstance(t string, ehi *eventHandlerInstance
 func (s *Session) handle(t string, i interface{}) {
 	for _, eh := range s.handlers[t] {
 		if s.SyncEvents {
-			eh.eventHandler.Handle(s, i)
+			s.fireEventHandler(eh.eventHandler, t, i)
 		} else {
-			go eh.eventHandler.Handle(s, i)
+			go s.fireEventHandler(eh.eventHandler, t, i)
 		}
 	}
 
 	if len(s.onceHandlers[t]) > 0 {
 		for _, eh := range s.onceHandlers[t] {
 			if s.SyncEvents {
-				eh.eventHandler.Handle(s, i)
+				s.fireEventHandler(eh.eventHandler, t, i)
 			} else {
-				go eh.eventHandler.Handle(s, i)
+				go s.fireEventHandler(eh.eventHandler, t, i)
 			}
 		}
 		s.onceHandlers[t] = nil
 	}
+}
+
+// fires the event and makes sure that any panics get recovered from
+func (s *Session) fireEventHandler(handler EventHandler, t string, i interface{}) {
+	defer s.handlePanic(t)
+	handler.Handle(s, i)
+}
+
+// recovers from panics and logs them
+func (s *Session) handlePanic(t string) {
+	p := recover()
+	if p == nil {
+		return
+	}
+
+	s.log(0, "%s", "panic happened in:", t, "returned:", p)
 }
 
 // Handles events coming in from NATS

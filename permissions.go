@@ -25,6 +25,7 @@ const (
 	PermissionVoiceMoveMembers
 	PermissionVoiceUseVAD
 	PermissionVoicePrioritySpeaker = 1 << (iota + 2)
+	PermissionVoiceStream
 )
 
 // Constants for general management.
@@ -74,7 +75,8 @@ const (
 		PermissionVoiceDeafenMembers |
 		PermissionVoiceMoveMembers |
 		PermissionVoiceUseVAD |
-		PermissionVoicePrioritySpeaker
+		PermissionVoicePrioritySpeaker |
+		PermissionVoiceStream
 	permissionAllChannel = permissionAllText |
 		permissionAllVoice |
 		PermissionCreateInstantInvite |
@@ -138,12 +140,14 @@ func (p *Permissions) ToMap() map[string]bool {
 		"MentionEveryone":    p.Has(PermissionMentionEveryone),
 		"UseExternalEmojis":  p.Has(PermissionUseExternalEmojis),
 
+		"VoiceConnect":         p.Has(PermissionVoiceConnect),
 		"VoiceSpeak":           p.Has(PermissionVoiceSpeak),
 		"VoiceMuteMembers":     p.Has(PermissionVoiceMuteMembers),
 		"VoiceDeafenMembers":   p.Has(PermissionVoiceDeafenMembers),
 		"VoiceMoveMembers":     p.Has(PermissionVoiceMoveMembers),
 		"VoiceUseVAD":          p.Has(PermissionVoiceUseVAD),
 		"VoicePrioritySpeaker": p.Has(PermissionVoicePrioritySpeaker),
+		"VoiceStream":          p.Has(PermissionVoiceStream),
 
 		"CreateInstantInvite": p.Has(PermissionCreateInstantInvite),
 		"ManageChannels":      p.Has(PermissionManageChannels),
@@ -158,6 +162,7 @@ func (p *Permissions) ToMap() map[string]bool {
 		"ManageEmojis":    p.Has(PermissionManageEmojis),
 		"ManageNicknames": p.Has(PermissionManageNicknames),
 		"ChangeNickname":  p.Has(PermissionChangeNickname),
+		"ViewAuditLogs":   p.Has(PermissionViewAuditLogs),
 	}
 }
 
@@ -211,17 +216,20 @@ func (p *PermissionOverwrite) ToMap() map[string]*bool {
 		"MentionEveryone":    p.Has(PermissionMentionEveryone),
 		"UseExternalEmojis":  p.Has(PermissionUseExternalEmojis),
 
+		"VoiceConnect":         p.Has(PermissionVoiceConnect),
 		"VoiceSpeak":           p.Has(PermissionVoiceSpeak),
 		"VoiceMuteMembers":     p.Has(PermissionVoiceMuteMembers),
 		"VoiceDeafenMembers":   p.Has(PermissionVoiceDeafenMembers),
 		"VoiceMoveMembers":     p.Has(PermissionVoiceMoveMembers),
 		"VoiceUseVAD":          p.Has(PermissionVoiceUseVAD),
 		"VoicePrioritySpeaker": p.Has(PermissionVoicePrioritySpeaker),
+		"VoiceStream":          p.Has(PermissionVoiceStream),
 
 		"CreateInstantInvite": p.Has(PermissionCreateInstantInvite),
-		"ManageChannels":      p.Has(PermissionManageChannels),
+		"ManageChannel":       p.Has(PermissionManageChannels),
 		"AddReactions":        p.Has(PermissionAddReactions),
-		"ManageRoles":         p.Has(PermissionManageRoles),
+		"ManagePermissions":   p.Has(PermissionManageRoles),
+		"ManageWebhooks":      p.Has(PermissionManageWebhooks),
 	}
 }
 
