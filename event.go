@@ -2,8 +2,8 @@ package discordgo
 
 import (
 	"encoding/json"
-
 	nats "github.com/nats-io/nats.go"
+	"runtime/debug"
 )
 
 // EventHandler is an interface for Discord events.
@@ -212,7 +212,10 @@ func (s *Session) handlePanic(t string) {
 		return
 	}
 
-	s.log(0, "%s", "panic happened in:", t, "returned:", p)
+	s.log(1, "panic happened in event: %s, panic returned: %s", t, p)
+	if s.LogLevel >= 1 {
+		debug.PrintStack()
+	}
 }
 
 // Handles events coming in from NATS

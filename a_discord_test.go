@@ -1,6 +1,7 @@
 package discordgo
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -267,4 +268,22 @@ func TestHandlerSessionInserter(t *testing.T) {
 	r()
 	m()
 	u()
+}
+
+func TestHandlerPanicRecovery(t *testing.T) {
+	panicingHandler := func(s *Session, m *MessageCreate) {
+		panic(errors.New("testing panic recovery"))
+	}
+
+	d := Session{
+		LogLevel: 1,
+	}
+	r := d.AddHandler(panicingHandler)
+
+	d.handleEvent(messageCreateEventType, &MessageCreate{})
+
+	r()
+
+	<-time.After(500 * time.Millisecond)
+
 }
