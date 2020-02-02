@@ -95,12 +95,6 @@ const (
 		PermissionChangeNickname
 )
 
-// Constants for aliases for other permissions
-const (
-	PermissionManageChannel     = PermissionManageChannels
-	PermissionManagePermissions = PermissionManageRoles
-)
-
 // Permissions is a type around the int value of a discord permission
 type Permissions int
 
@@ -232,9 +226,9 @@ func (p *PermissionOverwrite) ToMap() map[string]*bool {
 		"VoiceStream":          p.Has(PermissionVoiceStream),
 
 		"CreateInstantInvite": p.Has(PermissionCreateInstantInvite),
-		"ManageChannel":       p.Has(PermissionManageChannel),
+		"ManageChannel":       p.Has(PermissionManageChannels),
 		"AddReactions":        p.Has(PermissionAddReactions),
-		"ManagePermissions":   p.Has(PermissionManagePermissions),
+		"ManagePermissions":   p.Has(PermissionManageRoles),
 		"ManageWebhooks":      p.Has(PermissionManageWebhooks),
 	}
 }
@@ -325,12 +319,8 @@ func (p PermissionOffset) String() string {
 		return "Create Invite"
 	case PermissionManageChannels:
 		return "Manage Channels"
-	case PermissionManageChannel:
-		return "Manage Channel"
 	case PermissionManageRoles:
 		return "Manage Roles"
-	case PermissionManagePermissions:
-		return "Manage Permissions"
 	case PermissionKickMembers:
 		return "Kick Members"
 	case PermissionBanMembers:
