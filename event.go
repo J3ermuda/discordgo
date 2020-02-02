@@ -1,5 +1,9 @@
 package discordgo
 
+import (
+	"runtime/debug"
+)
+
 // EventHandler is an interface for Discord events.
 type EventHandler interface {
 	// Type returns the type of event this handler belongs to.
@@ -166,21 +170,40 @@ func (s *Session) removeEventHandlerInstance(t string, ehi *eventHandlerInstance
 func (s *Session) handle(t string, i interface{}) {
 	for _, eh := range s.handlers[t] {
 		if s.SyncEvents {
-			eh.eventHandler.Handle(s, i)
+			s.fireEventHandler(eh.eventHandler, t, i)
 		} else {
-			go eh.eventHandler.Handle(s, i)
+			go s.fireEventHandler(eh.eventHandler, t, i)
 		}
 	}
 
 	if len(s.onceHandlers[t]) > 0 {
 		for _, eh := range s.onceHandlers[t] {
 			if s.SyncEvents {
-				eh.eventHandler.Handle(s, i)
+				s.fireEventHandler(eh.eventHandler, t, i)
 			} else {
-				go eh.eventHandler.Handle(s, i)
+				go s.fireEventHandler(eh.eventHandler, t, i)
 			}
 		}
 		s.onceHandlers[t] = nil
+	}
+}
+
+// fires the event and makes sure that any panics get recovered from
+func (s *Session) fireEventHandler(handler EventHandler, t string, i interface{}) {
+	defer s.handlePanic(t)
+	handler.Handle(s, i)
+}
+
+// recovers from panics and logs them
+func (s *Session) handlePanic(t string) {
+	p := recover()
+	if p == nil {
+		return
+	}
+
+	s.log(1, "panic happened in event: %s, panic returned: %s", t, p)
+	if s.LogLevel >= 1 {
+		debug.PrintStack()
 	}
 }
 

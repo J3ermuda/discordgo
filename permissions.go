@@ -25,6 +25,7 @@ const (
 	PermissionVoiceMoveMembers
 	PermissionVoiceUseVAD
 	PermissionVoicePrioritySpeaker = 1 << (iota + 2)
+	PermissionVoiceStream
 )
 
 // Constants for general management.
@@ -74,7 +75,8 @@ const (
 		PermissionVoiceDeafenMembers |
 		PermissionVoiceMoveMembers |
 		PermissionVoiceUseVAD |
-		PermissionVoicePrioritySpeaker
+		PermissionVoicePrioritySpeaker |
+		PermissionVoiceStream
 	permissionAllChannel = permissionAllText |
 		permissionAllVoice |
 		PermissionCreateInstantInvite |
@@ -138,12 +140,14 @@ func (p *Permissions) ToMap() map[string]bool {
 		"MentionEveryone":    p.Has(PermissionMentionEveryone),
 		"UseExternalEmojis":  p.Has(PermissionUseExternalEmojis),
 
+		"VoiceConnect":         p.Has(PermissionVoiceConnect),
 		"VoiceSpeak":           p.Has(PermissionVoiceSpeak),
 		"VoiceMuteMembers":     p.Has(PermissionVoiceMuteMembers),
 		"VoiceDeafenMembers":   p.Has(PermissionVoiceDeafenMembers),
 		"VoiceMoveMembers":     p.Has(PermissionVoiceMoveMembers),
 		"VoiceUseVAD":          p.Has(PermissionVoiceUseVAD),
 		"VoicePrioritySpeaker": p.Has(PermissionVoicePrioritySpeaker),
+		"VoiceStream":          p.Has(PermissionVoiceStream),
 
 		"CreateInstantInvite": p.Has(PermissionCreateInstantInvite),
 		"ManageChannels":      p.Has(PermissionManageChannels),
@@ -158,6 +162,7 @@ func (p *Permissions) ToMap() map[string]bool {
 		"ManageEmojis":    p.Has(PermissionManageEmojis),
 		"ManageNicknames": p.Has(PermissionManageNicknames),
 		"ChangeNickname":  p.Has(PermissionChangeNickname),
+		"ViewAuditLogs":   p.Has(PermissionViewAuditLogs),
 	}
 }
 
@@ -211,17 +216,20 @@ func (p *PermissionOverwrite) ToMap() map[string]*bool {
 		"MentionEveryone":    p.Has(PermissionMentionEveryone),
 		"UseExternalEmojis":  p.Has(PermissionUseExternalEmojis),
 
+		"VoiceConnect":         p.Has(PermissionVoiceConnect),
 		"VoiceSpeak":           p.Has(PermissionVoiceSpeak),
 		"VoiceMuteMembers":     p.Has(PermissionVoiceMuteMembers),
 		"VoiceDeafenMembers":   p.Has(PermissionVoiceDeafenMembers),
 		"VoiceMoveMembers":     p.Has(PermissionVoiceMoveMembers),
 		"VoiceUseVAD":          p.Has(PermissionVoiceUseVAD),
 		"VoicePrioritySpeaker": p.Has(PermissionVoicePrioritySpeaker),
+		"VoiceStream":          p.Has(PermissionVoiceStream),
 
 		"CreateInstantInvite": p.Has(PermissionCreateInstantInvite),
-		"ManageChannels":      p.Has(PermissionManageChannels),
+		"ManageChannel":       p.Has(PermissionManageChannels),
 		"AddReactions":        p.Has(PermissionAddReactions),
-		"ManageRoles":         p.Has(PermissionManageRoles),
+		"ManagePermissions":   p.Has(PermissionManageRoles),
+		"ManageWebhooks":      p.Has(PermissionManageWebhooks),
 	}
 }
 
@@ -253,4 +261,85 @@ func NewVoicePermissions() Permissions {
 // with all general permissions from the official Discord UI set to true
 func NewGeneralPermissions() Permissions {
 	return Permissions(permissionAllGeneral)
+}
+
+// String returns the name of the PermissionOffset as it is in the discord UI
+func (p PermissionOffset) String() string {
+	switch p {
+	case permissionAll:
+		return "All permissions"
+	case permissionAllText:
+		return "All Text Permissions"
+	case permissionAllVoice:
+		return "All Voice Permissions"
+	case permissionAllChannel:
+		return "All Channel Permissions"
+	case permissionAllGeneral:
+		return "All General Permissions"
+
+	case PermissionReadMessages:
+		return "Read Messages"
+	case PermissionSendMessages:
+		return "Send Messages"
+	case PermissionSendTTSMessages:
+		return "Send TTS Messages"
+	case PermissionManageMessages:
+		return "Manage Messages"
+	case PermissionEmbedLinks:
+		return "Embed Links"
+	case PermissionAttachFiles:
+		return "Attach Files"
+	case PermissionReadMessageHistory:
+		return "Read Message History"
+	case PermissionMentionEveryone:
+		return "Mention Everyone"
+	case PermissionUseExternalEmojis:
+		return "Use External Emojis"
+	case PermissionAddReactions:
+		return "Add Reactions"
+
+	case PermissionVoiceConnect:
+		return "Connect"
+	case PermissionVoiceSpeak:
+		return "Speak"
+	case PermissionVoiceMuteMembers:
+		return "Mute Members"
+	case PermissionVoiceDeafenMembers:
+		return "Deafen Members"
+	case PermissionVoiceMoveMembers:
+		return "Move Members"
+	case PermissionVoiceUseVAD:
+		return "Use Voice Activity"
+	case PermissionVoicePrioritySpeaker:
+		return "Priority Speaker"
+	case PermissionVoiceStream:
+		return "Go Live"
+
+	case PermissionCreateInstantInvite:
+		return "Create Invite"
+	case PermissionManageChannels:
+		return "Manage Channels"
+	case PermissionManageRoles:
+		return "Manage Roles"
+	case PermissionKickMembers:
+		return "Kick Members"
+	case PermissionBanMembers:
+		return "Ban Members"
+	case PermissionManageServer:
+		return "Manage Server"
+	case PermissionAdministrator:
+		return "Administrator"
+	case PermissionManageWebhooks:
+		return "Manage Webhooks"
+	case PermissionManageEmojis:
+		return "Manage Emojis"
+	case PermissionManageNicknames:
+		return "Manage Nicknames"
+	case PermissionChangeNickname:
+		return "Change Nickname"
+	case PermissionViewAuditLogs:
+		return "View Audit Logs"
+	default:
+		return "Unknown"
+	}
 }

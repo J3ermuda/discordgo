@@ -309,6 +309,18 @@ func (g *Guild) GetPresence(userID string) (presence *Presence, err error) {
 	return nil, ErrObjectNotFound
 }
 
+// GetEmoji returns the emoji with the given ID
+// emojiID  : ID of the emoji that should be returned
+func (g *Guild) GetEmoji(emojiID string) (emoji *Emoji, err error) {
+	for _, emoji = range g.Emojis {
+		if emoji.ID == emojiID {
+			return emoji, nil
+		}
+	}
+
+	return nil, ErrObjectNotFound
+}
+
 // NewEdit creates a new GuildParams to chain an edit with
 func (g *Guild) NewEdit() *GuildParams {
 	return &GuildParams{}

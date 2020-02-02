@@ -33,7 +33,7 @@ type Member struct {
 	PremiumSince Timestamp `json:"premium_since"`
 
 	// Guild gets set when GetGuild gets called for the first time as an optimisation technique
-	Guild *Guild `json:"-"`
+	guild *Guild
 }
 
 // String returns a unique identifier of the form displayName#discriminator
@@ -109,8 +109,8 @@ func (m *Member) GetDisplayName() string {
 
 // GetGuild returns the guild object where the Member belongs to
 func (m *Member) GetGuild() (g *Guild, err error) {
-	if m.Guild != nil {
-		g = m.Guild
+	if m.guild != nil {
+		g = m.guild
 		return
 	}
 
@@ -119,7 +119,7 @@ func (m *Member) GetGuild() (g *Guild, err error) {
 		return
 	}
 
-	m.Guild = g
+	m.guild = g
 	return
 }
 
