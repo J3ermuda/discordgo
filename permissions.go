@@ -269,6 +269,7 @@ func NewGeneralPermissions() Permissions {
 	return Permissions(permissionAllGeneral)
 }
 
+// String returns the name of the PermissionOffset as it is in the discord UI
 func (p PermissionOffset) String() string {
 	switch p {
 	case permissionAll:
